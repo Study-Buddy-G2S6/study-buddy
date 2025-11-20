@@ -4,33 +4,9 @@ import { loggedInProtectedPage } from '@/lib/page-protection';
 import React from 'react';
 import { Container, Card, Row, Col, Image, Badge } from 'react-bootstrap';
 
-// const UserProfile = async () => {
-//
-//
-//
-//
-//
-//
-//
-//   return (
-//     <main>
-
-//     </main>
-//   );
-// };
-
 interface Course {
   code: string;
   title: string;
-}
-
-interface UserProfileProps {
-  name: string;
-  avatarSrc: string;
-  badges: string[];
-  bio: string;
-  courses: Course[];
-  contact: string;
 }
 
 /**
@@ -41,17 +17,18 @@ interface UserProfileProps {
  * style attributes have been removed. The navbar and footer are intentionally
  * omitted; everything needed is contained in the main card content.
  */
-const UserProfile = async ({
-  name = 'Alice A. Kamu',
-  avatarSrc = '/assets/img/avatar-placeholder.svg',
-  badges = ['Sensei', 'Algorithms'],
-  bio = 'Computer Science major who enjoys algorithms and distributed systems. Happy to help with ICS 311 and ICS 314.',
-  courses = [
+const UserProfile = async () => {
+  // Default data for the profile page
+  const name = 'Alice A. Kamu';
+  const avatarSrc = '/assets/img/avatar-placeholder.svg';
+  const badges = ['Sensei', 'Algorithms'];
+  const bio = 'Computer Science major who enjoys algorithms and distributed systems. '
+  + 'Happy to help with ICS 311 and ICS 314.';
+  const courses: Course[] = [
     { code: 'ICS 111', title: 'Intro to Programming' },
     { code: 'ICS 311', title: 'Algorithms' },
-  ],
-  contact = '@alice#1234',
-}: UserProfileProps) => {
+  ];
+  const contact = '@alice#1234';
   // Protect the page, only logged in users can access it.
   const session = await getServerSession(authOptions);
   loggedInProtectedPage(
