@@ -1,21 +1,72 @@
-import { Col, Container, Image, Row } from 'react-bootstrap';
+'use client';
 
-/** The Home page. */
+import React from 'react';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import './globals.css';
+import { Container, Card, Button, Row, Col } from 'react-bootstrap';
+import Image from 'next/image';
+
 const Home = () => (
-  <main>
-    <Container id="landing-page" fluid className="py-3">
-      <Row className="align-middle text-center">
-        <Col xs={4}>
-          <Image src="next.svg" width="150px" alt="" />
-        </Col>
-
-        <Col xs={8} className="d-flex flex-column justify-content-center">
-          <h1>Welcome to this template</h1>
-          <p>Now get to work and modify this app!</p>
-        </Col>
-      </Row>
-    </Container>
-  </main>
+  <div className="site">
+    <main className="hero">
+      <Container className="d-flex justify-content-center align-items-center py-5">
+        <Card
+          className="card p-4"
+          role="region"
+          aria-labelledby="main-heading"
+          style={{ maxWidth: 720, width: '100%' }}
+        >
+          <Card.Body>
+            <h1 id="main-heading">
+              University of Hawai&apos;i at Manoa — Study Buddy
+            </h1>
+            <p className="lead">
+              Connect with peers, organize study sessions, and find help for
+              ICS courses.
+            </p>
+            <Row>
+              <Col className="d-flex justify-content-center align-items-center my-3">
+                <Button
+                  as="a"
+                  href="/login.html"
+                  variant="primary"
+                  className="btn btn-primary"
+                >
+                  Login
+                </Button>
+              </Col>
+            </Row>
+            <Row>
+              <Col className="d-flex justify-content-center align-items-center mb-3">
+                <Button
+                  as="a"
+                  href="/auth/google"
+                  variant="light"
+                  className="btn btn-google d-flex align-items-center"
+                  title="Sign in with Google"
+                >
+                  <Image
+                    src="/google-logo.svg"
+                    width={18}
+                    height={18}
+                    alt=""
+                    aria-hidden="true"
+                    className="me-2"
+                  />
+                  Login with Google
+                </Button>
+              </Col>
+            </Row>
+            <Row>
+              <div className="small text-muted mt-2 mt-sm-0">
+                By logging in you agree to your university account policies.
+              </div>
+            </Row>
+          </Card.Body>
+        </Card>
+      </Container>
+    </main>
+  </div>
 );
 
 export default Home;

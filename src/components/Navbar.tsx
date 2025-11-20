@@ -16,17 +16,30 @@ const NavBar: React.FC = () => {
   return (
     <Navbar bg="light" expand="lg">
       <Container>
-        <Navbar.Brand href="/">Next.js Application Template</Navbar.Brand>
+        <Navbar.Brand href="/">Study Buddy</Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="me-auto justify-content-start">
+            {currentUser == null ? (
+              <Nav.Link href="/about" key="about" active={pathName === '/about'}>
+                About
+              </Nav.Link>
+            ) : (
+              ''
+            )}
             {currentUser
               ? [
-                  <Nav.Link id="add-stuff-nav" href="/add" key="add" active={pathName === '/add'}>
-                    Add Stuff
+                  <Nav.Link href="/about" key="about" active={pathName === '/about'}>
+                    About
                   </Nav.Link>,
-                  <Nav.Link id="list-stuff-nav" href="/list" key="list" active={pathName === '/list'}>
-                    List Stuff
+                  <Nav.Link href="/courses" key="courses" active={pathName === '/courses'}>
+                    Courses
+                  </Nav.Link>,
+                  <Nav.Link href="/help" key="help" active={pathName === '/help'}>
+                    Help
+                  </Nav.Link>,
+                  <Nav.Link href="/profile" key="profile" active={pathName === '/profile'}>
+                    Profile
                   </Nav.Link>,
                 ]
               : ''}
