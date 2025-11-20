@@ -17,7 +17,7 @@ const Home = () => (
           style={{ maxWidth: 720, width: '100%' }}
         >
           <Card.Body>
-            <h1 id="main-heading">
+            <h1>
               University of Hawai&apos;i at Manoa — Study Buddy
             </h1>
             <p className="lead">
