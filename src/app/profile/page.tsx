@@ -1,6 +1,5 @@
-import { getServerSession } from 'next-auth';
-import authOptions from '@/lib/authOptions';
-import { loggedInProtectedPage } from '@/lib/page-protection';
+'use client';
+
 import React from 'react';
 import { Container, Card, Row, Col, Image, Badge } from 'react-bootstrap';
 
@@ -29,13 +28,6 @@ const UserProfile = async () => {
     { code: 'ICS 311', title: 'Algorithms' },
   ];
   const contact = '@alice#1234';
-  // Protect the page, only logged in users can access it.
-  const session = await getServerSession(authOptions);
-  loggedInProtectedPage(
-    session as {
-      user: { email: string; id: string; randomKey: string };
-    } | null,
-  );
   return (
     <main>
       <Container className="py-4">
