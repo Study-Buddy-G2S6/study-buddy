@@ -25,12 +25,12 @@ interface Course {
 }
 
 interface UserProfileProps {
-  name?: string;
-  avatarSrc?: string;
-  badges?: string[];
-  bio?: string;
-  courses?: Course[];
-  contact?: string;
+  name: string;
+  avatarSrc: string;
+  badges: string[];
+  bio: string;
+  courses: Course[];
+  contact: string;
 }
 
 /**
@@ -41,7 +41,7 @@ interface UserProfileProps {
  * style attributes have been removed. The navbar and footer are intentionally
  * omitted; everything needed is contained in the main card content.
  */
-const UserProfile: React.FC<UserProfileProps> = async ({
+const UserProfile = async ({
   name = 'Alice A. Kamu',
   avatarSrc = '/assets/img/avatar-placeholder.svg',
   badges = ['Sensei', 'Algorithms'],
@@ -51,7 +51,7 @@ const UserProfile: React.FC<UserProfileProps> = async ({
     { code: 'ICS 311', title: 'Algorithms' },
   ],
   contact = '@alice#1234',
-}) => {
+}: UserProfileProps) => {
   // Protect the page, only logged in users can access it.
   const session = await getServerSession(authOptions);
   loggedInProtectedPage(
@@ -107,16 +107,6 @@ const UserProfile: React.FC<UserProfileProps> = async ({
   );
 };
 
-UserProfile.defaultProps = {
-  name: 'Alice A. Kamu',
-  avatarSrc: '/assets/img/avatar-placeholder.svg',
-  badges: ['Sensei', 'Algorithms'],
-  bio: 'Computer Science major who enjoys algorithms and distributed systems. Happy to help with ICS 311 and ICS 314.',
-  courses: [
-    { code: 'ICS 111', title: 'Intro to Programming' },
-    { code: 'ICS 311', title: 'Algorithms' },
-  ],
-  contact: '@alice#1234',
-};
+// Default parameter values are provided in the function signature above.
 
 export default UserProfile;
