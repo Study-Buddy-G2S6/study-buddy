@@ -1,0 +1,2 @@
+# Ignore the problematic generated/temporary SignInButtons file
+src/components/SignInButtons.tsx
