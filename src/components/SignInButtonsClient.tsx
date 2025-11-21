@@ -24,14 +24,6 @@ export default function SignInButtonsClient({ uhError = false }: Props) {
           >
             Sign in
           </Button>
-          <Button
-            variant="success"
-            className="btn me-2"
-            title="Sign up for Study Buddy"
-            href="/auth/signup"
-          >
-            Sign up
-          </Button>
         </Col>
       </Row>
       <Row>

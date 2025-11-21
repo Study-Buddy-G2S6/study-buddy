@@ -55,10 +55,13 @@ const NavBar: React.FC = () => {
             {session ? (
               <NavDropdown id="login-dropdown" title={currentUser}>
                 <NavDropdown.Item id="login-dropdown-user-home" href="/user-home">
-                  User Home
+                  UserHome
                 </NavDropdown.Item>
                 <NavDropdown.Item id="login-dropdown-admin-home" href="/admin">
-                  Admin Home
+                  AdminHome
+                </NavDropdown.Item>
+                <NavDropdown.Item id="login-dropdown-sign-up" href="/auth/signup">
+                  Sign Up
                 </NavDropdown.Item>
                 <NavDropdown.Divider />
                 <NavDropdown.Item id="login-dropdown-sign-out" href="/api/auth/signout">
@@ -75,6 +78,9 @@ const NavBar: React.FC = () => {
                 <NavDropdown.Item id="login-dropdown-sign-in" href="/auth/signin">
                   <PersonFill />
                   Sign in
+                </NavDropdown.Item>
+                <NavDropdown.Item id="login-dropdown-sign-up" href="/auth/signup">
+                  Sign Up
                 </NavDropdown.Item>
               </NavDropdown>
             )}
