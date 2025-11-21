@@ -1,6 +1,6 @@
 // src/app/list/page.tsx
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/authOptions';
+import authOptions from '@/lib/authOptions';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { Button, Container } from 'react-bootstrap';
