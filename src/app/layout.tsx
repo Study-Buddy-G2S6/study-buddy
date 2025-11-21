@@ -20,9 +20,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body className={inter.className}>
         <Providers>
-          <NavBar /> {/* ← Only here — once */}
+          <NavBar />
+          {' '}
+          {/* ← Only here — once */}
           <main>{children}</main>
-          <Footer /> {/* ← Only here — once */}
+          <Footer />
+          {' '}
+          {/* ← Only here — once */}
         </Providers>
       </body>
     </html>

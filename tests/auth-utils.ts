@@ -17,15 +17,38 @@ if (!fs.existsSync(SESSION_STORAGE_PATH)) {
 interface AuthFixtures {
   getUserPage: (email: string, password: string) => Promise<Page>;
 }
+
+/**
+ * Helper to fill form fields with retry logic
+ */
+async function fillFormWithRetry(page: Page, fields: Array<{ selector: string; value: string }>): Promise<void> {
+  for (const field of fields) {
+    let attempts = 0;
+    const maxAttempts = 3;
+
+    while (attempts < maxAttempts) {
+      try {
+        const element = page.locator(field.selector);
+        await element.waitFor({ state: 'visible', timeout: 2000 });
+        await element.clear();
+        await element.fill(field.value);
+        await element.evaluate((el) => el.blur()); // Trigger blur event
+        break;
+      } catch (error) {
+        attempts++;
+        if (attempts >= maxAttempts) {
+          throw new Error(`Failed to fill field ${field.selector} after ${maxAttempts} attempts`);
+        }
+        await page.waitForTimeout(500);
+      }
+    }
+  }
+}
+
 /**
  * Authenticate using the UI with robust waiting and error handling
  */
-async function authenticateWithUI(
-  page: Page,
-  email: string,
-  password: string,
-  sessionName: string
-): Promise<void> {
+async function authenticateWithUI(page: Page, email: string, password: string, sessionName: string): Promise<void> {
   const sessionPath = path.join(SESSION_STORAGE_PATH, `${sessionName}.json`);
 
   // Try to restore session from storage if available
@@ -40,10 +63,22 @@ async function authenticateWithUI(
 
       // Check if we're authenticated by looking for a sign-out option or user email
       const isAuthenticated = await Promise.race([
-        page.getByText(email).isVisible().then((visible) => visible),
-        page.getByRole('button', { name: email }).isVisible().then((visible) => visible),
-        page.getByText('Sign out').isVisible().then((visible) => visible),
-        page.getByRole('button', { name: 'Sign out' }).isVisible().then((visible) => visible),
+        page
+          .getByText(email)
+          .isVisible()
+          .then((visible) => visible),
+        page
+          .getByRole('button', { name: email })
+          .isVisible()
+          .then((visible) => visible),
+        page
+          .getByText('Sign out')
+          .isVisible()
+          .then((visible) => visible),
+        page
+          .getByRole('button', { name: 'Sign out' })
+          .isVisible()
+          .then((visible) => visible),
         // eslint-disable-next-line no-promise-executor-return
         new Promise<boolean>((resolve) => setTimeout(() => resolve(false), 3000)),
       ]);
@@ -75,7 +110,7 @@ async function authenticateWithUI(
 
     // Click submit button and wait for navigation
     const submitButton = page.getByRole('button', { name: /sign[ -]?in/i });
-    if (!await submitButton.isVisible({ timeout: 1000 })) {
+    if (!(await submitButton.isVisible({ timeout: 1000 }))) {
       // Try alternative selector if the first one doesn't work
       await page.getByRole('button', { name: /log[ -]?in/i }).click();
     } else {
@@ -88,10 +123,22 @@ async function authenticateWithUI(
     // Verify authentication was successful
     await expect(async () => {
       const authState = await Promise.race([
-        page.getByText(email).isVisible().then((visible) => ({ success: visible })),
-        page.getByRole('button', { name: email }).isVisible().then((visible) => ({ success: visible })),
-        page.getByText('Sign out').isVisible().then((visible) => ({ success: visible })),
-        page.getByRole('button', { name: 'Sign out' }).isVisible().then((visible) => ({ success: visible })),
+        page
+          .getByText(email)
+          .isVisible()
+          .then((visible) => ({ success: visible })),
+        page
+          .getByRole('button', { name: email })
+          .isVisible()
+          .then((visible) => ({ success: visible })),
+        page
+          .getByText('Sign out')
+          .isVisible()
+          .then((visible) => ({ success: visible })),
+        page
+          .getByRole('button', { name: 'Sign out' })
+          .isVisible()
+          .then((visible) => ({ success: visible })),
         // eslint-disable-next-line no-promise-executor-return
         new Promise<{ success: boolean }>((resolve) => setTimeout(() => resolve({ success: false }), 5000)),
       ]);
@@ -107,36 +154,6 @@ async function authenticateWithUI(
     console.error(`× Authentication failed for ${email}:`, error);
 
     throw new Error(`Authentication failed: ${error}`);
-  }
-}
-
-/**
- * Helper to fill form fields with retry logic
- */
-async function fillFormWithRetry(
-  page: Page,
-  fields: Array<{ selector: string; value: string }>
-): Promise<void> {
-  for (const field of fields) {
-    let attempts = 0;
-    const maxAttempts = 3;
-
-    while (attempts < maxAttempts) {
-      try {
-        const element = page.locator(field.selector);
-        await element.waitFor({ state: 'visible', timeout: 2000 });
-        await element.clear();
-        await element.fill(field.value);
-        await element.evaluate((el) => el.blur()); // Trigger blur event
-        break;
-      } catch (error) {
-        attempts++;
-        if (attempts >= maxAttempts) {
-          throw new Error(`Failed to fill field ${field.selector} after ${maxAttempts} attempts`);
-        }
-        await page.waitForTimeout(500);
-      }
-    }
   }
 }
 

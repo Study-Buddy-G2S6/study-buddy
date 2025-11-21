@@ -1,9 +1,7 @@
-// src/lib/authOptions.ts
 import { compare } from 'bcrypt';
 import { type NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { prisma } from '@/lib/prisma';
-import adminEmails from './adminEmails';
 
 const authOptions: NextAuthOptions = {
   session: { strategy: 'jwt' },
@@ -31,7 +29,7 @@ const authOptions: NextAuthOptions = {
           id: user.id.toString(),
           email: user.email,
           name: user.name ?? undefined,
-          role: user.role, // ← this is what your navbar reads
+          role: user.role, // This is correct
         };
       },
     }),
@@ -44,21 +42,25 @@ const authOptions: NextAuthOptions = {
   callbacks: {
     jwt: ({ token, user }) => {
       if (user) {
-        token.id = user.id;
-        token.role = user.role;
+        const id = (user as any).id ?? token.id;
+        const role = (user as any).role ?? token.role;
+        return { ...token, id, role };
       }
       return token;
     },
 
     session: ({ session, token }) => {
       if (token) {
-        session.user.id = token.id as string;
-        session.user.role = token.role as string;
+        const user = {
+          ...(session.user ?? {}),
+          id: token.id as string,
+          role: token.role as string,
+        };
+        return { ...session, user };
       }
       return session;
     },
 
-    // ← THIS ALLOWS TEST ACCOUNTS (delete the block when you go live)
     async signIn({ user }) {
       const email = user?.email?.toLowerCase() ?? '';
       if (email === 'admin@foo.com' || email === 'john@foo.com') return true;
@@ -66,11 +68,9 @@ const authOptions: NextAuthOptions = {
       return true;
     },
 
-    // ← THIS FIXES THE "CAN'T LOG IN" BUG
     async redirect({ url, baseUrl }) {
-      // After successful login → go straight to user-home
       if (url.startsWith('/')) return url;
-      return baseUrl + '/user-home';
+      return `${baseUrl}/user-home`;
     },
   },
 

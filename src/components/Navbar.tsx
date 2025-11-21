@@ -7,16 +7,7 @@ import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Container, Nav, Navbar, NavDropdown, Badge } from 'react-bootstrap';
-import {
-  BoxArrowRight,
-  Lock,
-  PersonFill,
-  PersonPlusFill,
-  House,
-  GearFill,
-  Calendar3Event,
-  PeopleFill,
-} from 'react-bootstrap-icons';
+import { BoxArrowRight, Lock, House, GearFill, Calendar3Event, PeopleFill } from 'react-bootstrap-icons';
 
 const NavBar: React.FC = () => {
   const { data: session } = useSession();
@@ -28,8 +19,8 @@ const NavBar: React.FC = () => {
 
   return (
     <Navbar bg="dark" variant="dark" expand="lg" sticky="top" className="shadow">
-      <Container className="d-flex align-items-center">
-        {/* UH Seal + Study Buddy — Bigger & Centered */}
+      <Container>
+        {/* Brand with UH Seal */}
         <Navbar.Brand as={Link} href={isLoggedIn ? '/user-home' : '/'} className="d-flex align-items-center">
           <Image
             src="/uh-seal.png"
@@ -53,31 +44,41 @@ const NavBar: React.FC = () => {
             {isLoggedIn && (
               <>
                 <Nav.Link as={Link} href="/user-home" active={pathname === '/user-home'}>
-                  <House className="me-1" /> Home
+                  <House className="me-1" />
+                  Home
                 </Nav.Link>
+
                 <Nav.Link as={Link} href="/sessions" active={pathname.startsWith('/sessions')}>
-                  <PeopleFill className="me-1" /> Study Sessions
+                  <PeopleFill className="me-1" />
+                  Study Sessions
                 </Nav.Link>
+
                 <Nav.Link as={Link} href="/sessions/create" active={pathname === '/sessions/create'}>
                   Create Session
                 </Nav.Link>
+
                 <Nav.Link as={Link} href="/calendar" active={pathname === '/calendar'}>
-                  <Calendar3Event className="me-1" /> Calendar
+                  <Calendar3Event className="me-1" />
+                  Calendar
                 </Nav.Link>
+
+                {/* RED ADMIN LINK — ONLY FOR ADMINS */}
                 {isAdmin && (
                   <Nav.Link
                     as={Link}
                     href="/admin-dashboard"
-                    className="text-warning fw-bold"
-                    active={pathname === '/admin-dashboard'}
+                    className="text-danger fw-bold"
+                    active={pathname.startsWith('/admin')}
                   >
-                    <GearFill className="me-1" /> Admin
+                    <GearFill className="me-1" />
+                    Admin
                   </Nav.Link>
                 )}
               </>
             )}
           </Nav>
 
+          {/* Right: User Dropdown */}
           <Nav>
             {session ? (
               <NavDropdown
@@ -85,7 +86,7 @@ const NavBar: React.FC = () => {
                   <span className="text-white fw-medium">
                     {user?.name?.split(' ')[0] || user?.email}
                     {isAdmin && (
-                      <Badge bg="gold" text="dark" className="ms-2">
+                      <Badge bg="danger" className="ms-2">
                         ADMIN
                       </Badge>
                     )}
@@ -97,11 +98,13 @@ const NavBar: React.FC = () => {
                   Profile
                 </NavDropdown.Item>
                 <NavDropdown.Item as={Link} href="/auth/change-password">
-                  <Lock className="me-2" /> Change Password
+                  <Lock className="me-2" />
+                  Change Password
                 </NavDropdown.Item>
                 <NavDropdown.Divider />
                 <NavDropdown.Item href="/api/auth/signout">
-                  <BoxArrowRight className="me-2" /> Sign Out
+                  <BoxArrowRight className="me-2" />
+                  Sign Out
                 </NavDropdown.Item>
               </NavDropdown>
             ) : (

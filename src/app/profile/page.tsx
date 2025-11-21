@@ -16,13 +16,14 @@ interface Course {
  * style attributes have been removed. The navbar and footer are intentionally
  * omitted; everything needed is contained in the main card content.
  */
-const UserProfile = async () => {
+const UserProfile = () => {
   // Default data for the profile page
   const name = 'Alice A. Kamu';
   const avatarSrc = '/assets/img/avatar-placeholder.svg';
   const badges = ['Sensei', 'Algorithms'];
-  const bio = 'Computer Science major who enjoys algorithms and distributed systems. '
-  + 'Happy to help with ICS 311 and ICS 314.';
+  const bio =
+    'Computer Science major who enjoys algorithms and distributed systems. ' +
+    'Happy to help with ICS 311 and ICS 314.';
   const courses: Course[] = [
     { code: 'ICS 111', title: 'Intro to Programming' },
     { code: 'ICS 311', title: 'Algorithms' },
