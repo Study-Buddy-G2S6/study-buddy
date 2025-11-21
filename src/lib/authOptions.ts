@@ -3,6 +3,7 @@ import { compare } from 'bcrypt';
 import { type NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { prisma } from '@/lib/prisma';
+import adminEmails from './adminEmails';
 
 const authOptions: NextAuthOptions = {
   session: {
@@ -72,9 +73,24 @@ const authOptions: NextAuthOptions = {
           ...token,
           id: u.id,
           randomKey: u.randomKey,
+          // keep the email on the token for redirect decisions
+          email: u.email,
         };
       }
       return token;
+    },
+    // Control sign-in redirect based on email domain and admin list
+    async signIn({ user }) {
+      const email = (user as any)?.email ?? '';
+      if (!email.toLowerCase().endsWith('@hawaii.edu')) {
+        // Not a UH email: redirect back to landing with an error flag
+        return '/?uh_error=1';
+      }
+      // UH email: if in admin list, redirect to admin, otherwise to the app home
+      if (adminEmails.includes(email.toLowerCase())) {
+        return '/admin';
+      }
+      return '/list';
     },
   },
   secret: process.env.NEXTAUTH_SECRET,
