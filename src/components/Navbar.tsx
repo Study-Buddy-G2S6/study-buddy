@@ -27,37 +27,43 @@ const NavBar: React.FC = () => {
   const isAdmin = user?.role === 'ADMIN';
 
   return (
-    <Navbar bg="dark" variant="dark" expand="lg" sticky="top" className="shadow-sm py-2">
-      <Container>
-        {/* Brand with UH Seal */}
-        <Navbar.Brand as={Link} href={isLoggedIn ? '/user-home' : '/'} className="d-flex align-items-center fw-bold">
-          <Image src="/uh-seal.png" alt="UH Mānoa" width={38} height={38} className="me-2 rounded-circle" priority />
-          Study Buddy
+    <Navbar bg="dark" variant="dark" expand="lg" sticky="top" className="shadow">
+      <Container className="d-flex align-items-center">
+        {/* UH Seal + Study Buddy — Bigger & Centered */}
+        <Navbar.Brand as={Link} href={isLoggedIn ? '/user-home' : '/'} className="d-flex align-items-center">
+          <Image
+            src="/uh-seal.png"
+            alt="UH Mānoa"
+            width={60}
+            height={60}
+            className="me-3 rounded-circle shadow-sm"
+            priority
+            style={{ objectFit: 'contain' }}
+          />
+          <div>
+            <div className="fw-bold fs-4 text-white">Study Buddy</div>
+            <div className="text-success small fw-medium">UH Mānoa • ICS Study Sessions</div>
+          </div>
         </Navbar.Brand>
 
         <Navbar.Toggle aria-controls="main-nav" />
 
         <Navbar.Collapse id="main-nav">
-          {/* Left: Main Links */}
           <Nav className="me-auto">
             {isLoggedIn && (
               <>
                 <Nav.Link as={Link} href="/user-home" active={pathname === '/user-home'}>
                   <House className="me-1" /> Home
                 </Nav.Link>
-
                 <Nav.Link as={Link} href="/sessions" active={pathname.startsWith('/sessions')}>
                   <PeopleFill className="me-1" /> Study Sessions
                 </Nav.Link>
-
                 <Nav.Link as={Link} href="/sessions/create" active={pathname === '/sessions/create'}>
                   Create Session
                 </Nav.Link>
-
                 <Nav.Link as={Link} href="/calendar" active={pathname === '/calendar'}>
                   <Calendar3Event className="me-1" /> Calendar
                 </Nav.Link>
-
                 {isAdmin && (
                   <Nav.Link
                     as={Link}
@@ -72,15 +78,14 @@ const NavBar: React.FC = () => {
             )}
           </Nav>
 
-          {/* Right: User Menu */}
           <Nav>
             {session ? (
               <NavDropdown
                 title={
-                  <span className="text-white">
+                  <span className="text-white fw-medium">
                     {user?.name?.split(' ')[0] || user?.email}
                     {isAdmin && (
-                      <Badge bg="warning" text="dark" className="ms-2">
+                      <Badge bg="gold" text="dark" className="ms-2">
                         ADMIN
                       </Badge>
                     )}
@@ -100,7 +105,7 @@ const NavBar: React.FC = () => {
                 </NavDropdown.Item>
               </NavDropdown>
             ) : (
-              <Nav.Link as={Link} href="/auth/signin" className="btn btn-outline-light">
+              <Nav.Link as={Link} href="/auth/signin" className="btn btn-outline-success">
                 Sign In
               </Nav.Link>
             )}
