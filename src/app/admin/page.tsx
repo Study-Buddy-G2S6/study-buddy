@@ -1,5 +1,6 @@
 import { getServerSession } from 'next-auth';
 import { Col, Container, Row, Table } from 'react-bootstrap';
+import Navbar from '@/components/Navbar';
 import StuffItemAdmin from '@/components/StuffItemAdmin';
 import { prisma } from '@/lib/prisma';
 import { adminProtectedPage } from '@/lib/page-protection';
@@ -17,6 +18,7 @@ const AdminPage = async () => {
 
   return (
     <main>
+      <Navbar />
       <Container id="list" fluid className="py-3">
         <Row>
           <Col>

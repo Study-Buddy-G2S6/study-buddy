@@ -16,7 +16,7 @@ export const loggedInProtectedPage = (session: { user: { email: string; id: stri
  */
 export const adminProtectedPage = (session: { user: { email: string; id: string; randomKey: string } } | null) => {
   loggedInProtectedPage(session);
-  if (session && session.user.randomKey !== Role.ADMIN) {
+  if (session && session.user.randomKey !== 'ADMIN') {
     redirect('/not-authorized');
   }
 };
