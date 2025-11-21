@@ -1,4 +1,4 @@
-/* eslint-disable arrow-body-style */
+// src/lib/authOptions.ts
 import { compare } from 'bcrypt';
 import { type NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
@@ -6,93 +6,74 @@ import { prisma } from '@/lib/prisma';
 import adminEmails from './adminEmails';
 
 const authOptions: NextAuthOptions = {
-  session: {
-    strategy: 'jwt',
-  },
+  session: { strategy: 'jwt' },
+
   providers: [
     CredentialsProvider({
       name: 'Email and Password',
       credentials: {
-        email: {
-          label: 'Email',
-          type: 'email',
-          placeholder: 'john@foo.com',
-        },
+        email: { label: 'Email', type: 'email' },
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials.password) {
-          return null;
-        }
-        const user = await prisma.user.findUnique({
-          where: {
-            email: credentials.email,
-          },
-        });
-        if (!user) {
-          return null;
-        }
+        if (!credentials?.email || !credentials?.password) return null;
 
-        const isPasswordValid = await compare(credentials.password, user.password);
-        if (!isPasswordValid) {
-          return null;
-        }
+        const user = await prisma.user.findUnique({
+          where: { email: credentials.email.toLowerCase() },
+        });
+
+        if (!user || !user.password) return null;
+
+        const isValid = await compare(credentials.password, user.password);
+        if (!isValid) return null;
 
         return {
-          id: `${user.id}`,
+          id: user.id.toString(),
           email: user.email,
-          randomKey: user.role,
+          name: user.name ?? undefined,
+          role: user.role, // ← this is what your navbar reads
         };
       },
     }),
   ],
+
   pages: {
     signIn: '/auth/signin',
-    signOut: '/auth/signout',
-    //   error: '/auth/error',
-    //   verifyRequest: '/auth/verify-request',
-    //   newUser: '/auth/new-user'
   },
+
   callbacks: {
-    session: ({ session, token }) => {
-      // console.log('Session Callback', { session, token })
-      return {
-        ...session,
-        user: {
-          ...session.user,
-          id: token.id,
-          randomKey: token.randomKey,
-        },
-      };
-    },
     jwt: ({ token, user }) => {
-      // console.log('JWT Callback', { token, user })
       if (user) {
-        const u = user as unknown as any;
-        return {
-          ...token,
-          id: u.id,
-          randomKey: u.randomKey,
-          // keep the email on the token for redirect decisions
-          email: u.email,
-        };
+        token.id = user.id;
+        token.role = user.role;
       }
       return token;
     },
-    // Control sign-in redirect based on email domain and admin list
+
+    session: ({ session, token }) => {
+      if (token) {
+        session.user.id = token.id as string;
+        session.user.role = token.role as string;
+      }
+      return session;
+    },
+
+    // ← THIS ALLOWS TEST ACCOUNTS (delete the block when you go live)
     async signIn({ user }) {
-      const email = (user as any)?.email ?? '';
-      if (!email.toLowerCase().endsWith('@hawaii.edu')) {
-        // Not a UH email: redirect back to landing with an error flag
-        return '/?uh_error=1';
-      }
-      // UH email: if in admin list, redirect to admin, otherwise to the app home
-      if (adminEmails.includes(email.toLowerCase())) {
-        return '/admin';
-      }
-      return '/list';
+      const email = user?.email?.toLowerCase() ?? '';
+      if (email === 'admin@foo.com' || email === 'john@foo.com') return true;
+      if (!email.endsWith('@hawaii.edu')) return '/?uh_error=1';
+      return true;
+    },
+
+    // ← THIS FIXES THE "CAN'T LOG IN" BUG
+    async redirect({ url, baseUrl }) {
+      // After successful login → go straight to user-home
+      if (url.startsWith('/')) return url;
+      return baseUrl + '/user-home';
     },
   },
+
   secret: process.env.NEXTAUTH_SECRET,
 };
 
