@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './globals.css';
 import { Container, Card, Button, Row, Col } from 'react-bootstrap';
@@ -10,7 +10,7 @@ import { signIn } from 'next-auth/react';
 
 export const dynamic = 'force-dynamic';
 
-const Home = () => {
+const HomeContent = () => {
   const params = useSearchParams();
   const uhError = params?.get('uh_error') === '1';
 
@@ -117,4 +117,10 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default function Home() {
+  return (
+    <Suspense fallback={null}>
+      <HomeContent />
+    </Suspense>
+  );
+}
