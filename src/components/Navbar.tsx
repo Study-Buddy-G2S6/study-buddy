@@ -10,8 +10,6 @@ import { BoxArrowRight, Lock, PersonFill } from 'react-bootstrap-icons';
 const NavBar: React.FC = () => {
   const { data: session } = useSession();
   const currentUser = session?.user?.email;
-  const userWithRole = session?.user as { email: string; randomKey: string };
-  const role = userWithRole?.randomKey;
   const pathName = usePathname();
   let brandHref = '/';
   if (pathName === '/user-home') brandHref = '/user-home';
@@ -61,16 +59,14 @@ const NavBar: React.FC = () => {
                       </Nav.Link>
                     </>
                   )}
-                  {currentUser && role === 'ADMIN' && (
-                    <Nav.Link
-                      id="admin-stuff-nav"
-                      href="/admin"
-                      key="admin"
-                      active={pathName === '/admin'}
-                    >
-                      Admin
-                    </Nav.Link>
-                  )}
+                  <Nav.Link
+                    id="admin-stuff-nav"
+                    href="/admin"
+                    key="admin"
+                    active={pathName === '/admin'}
+                  >
+                    Admin
+                  </Nav.Link>
                 </>
               );
             })()}
