@@ -5,7 +5,7 @@ import './globals.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 import Footer from '@/components/Footer';
-import NavBar from '@/components/NavBar'; // ← Fixed: was Navbar → now NavBar
+import Navbar from '@/components/Navbar'; // ← Fixed: was Navbar → now Navbar
 import Providers from './providers';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -20,7 +20,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body className={inter.className}>
         <Providers>
-          <NavBar /> {/* ← Only here — once */}
+          <Navbar /> {/* ← Only here — once */}
           <main>{children}</main>
           <Footer /> {/* ← Only here — once */}
         </Providers>
