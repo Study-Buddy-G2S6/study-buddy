@@ -1,6 +1,6 @@
 // src/app/admin-dashboard/page.tsx
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/authOptions';
+import authOptions from '@/lib/authOptions';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -8,7 +8,8 @@ import { Button, Container } from 'react-bootstrap';
 
 export default async function AdminDashboard() {
   const session = await getServerSession(authOptions);
-  if (!session?.user || session.user.role !== 'ADMIN') redirect('/not-authorized');
+  const user = session?.user as { email?: string; name?: string; role?: string } | null;
+  if (!session?.user || user?.role !== 'ADMIN') redirect('/not-authorized');
 
   return (
     <>
