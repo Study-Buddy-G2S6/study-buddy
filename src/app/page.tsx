@@ -8,6 +8,8 @@ import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
 import { signIn } from 'next-auth/react';
 
+export const dynamic = 'force-dynamic';
+
 const Home = () => {
   const params = useSearchParams();
   const uhError = params?.get('uh_error') === '1';
