@@ -16,26 +16,30 @@ const Home = () => (
           aria-labelledby="main-heading"
           style={{ maxWidth: 720, width: '100%' }}
         >
-          <Card.Body>
-            <h1>
+          <Card.Body className="text-center">
+            <Row>
+              <Col className="d-flex justify-content-center align-items-center mb-3">
+                <a href="/uh-logo" title="University of Hawaiʻi logo">
+                  <div className="uh-logo-container">
+                    <Image
+                      src="/uhlogo.png"
+                      width={120}
+                      height={120}
+                      alt="University of Hawaiʻi Mānoa - Study Buddy"
+                      className="uh-logo-img"
+                    />
+                  </div>
+                </a>
+              </Col>
+            </Row>
+            <h1 style={{ color: '#0b5f3d' }}>
               University of Hawai&apos;i at Manoa — Study Buddy
             </h1>
             <p className="lead">
               Connect with peers, organize study sessions, and find help for
               ICS courses.
             </p>
-            <Row>
-              <Col className="d-flex justify-content-center align-items-center my-3">
-                <Button
-                  as="a"
-                  href="/login.html"
-                  variant="primary"
-                  className="btn btn-primary"
-                >
-                  Login
-                </Button>
-              </Col>
-            </Row>
+            {/* Primary login button removed per request; keep Google login button below */}
             <Row>
               <Col className="d-flex justify-content-center align-items-center mb-3">
                 <Button

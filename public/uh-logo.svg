@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="480" height="120" viewBox="0 0 480 120" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="University of Hawaiʻi Manoa Study Buddy">
+  <defs>
+    <linearGradient id="g" x1="0" x2="1">
+      <stop offset="0%" stop-color="#0b5f3d" />
+      <stop offset="100%" stop-color="#0f8a5a" />
+    </linearGradient>
+  </defs>
+  <rect width="100%" height="100%" fill="none" />
+  <g transform="translate(20,10)">
+    <circle cx="40" cy="40" r="36" fill="#0b5f3d" />
+    <text x="100" y="42" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="url(#g)" font-weight="700">
+      University of Hawaiʻi
+    </text>
+    <text x="100" y="66" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#0b5f3d">
+      Mānoa Study Buddy
+    </text>
+  </g>
+</svg>
