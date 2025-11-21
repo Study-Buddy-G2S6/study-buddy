@@ -10,8 +10,6 @@ import { Container, Nav, Navbar, NavDropdown, Badge } from 'react-bootstrap';
 import {
   BoxArrowRight,
   Lock,
-  PersonFill,
-  PersonPlusFill,
   House,
   GearFill,
   Calendar3Event,
@@ -53,16 +51,19 @@ const NavBar: React.FC = () => {
             {isLoggedIn && (
               <>
                 <Nav.Link as={Link} href="/user-home" active={pathname === '/user-home'}>
-                  <House className="me-1" /> Home
+                  <House className="me-1" />
+                  <span>Home</span>
                 </Nav.Link>
                 <Nav.Link as={Link} href="/sessions" active={pathname.startsWith('/sessions')}>
-                  <PeopleFill className="me-1" /> Study Sessions
+                  <PeopleFill className="me-1" />
+                  <span>Study Sessions</span>
                 </Nav.Link>
                 <Nav.Link as={Link} href="/sessions/create" active={pathname === '/sessions/create'}>
                   Create Session
                 </Nav.Link>
                 <Nav.Link as={Link} href="/calendar" active={pathname === '/calendar'}>
-                  <Calendar3Event className="me-1" /> Calendar
+                  <Calendar3Event className="me-1" />
+                  <span>Calendar</span>
                 </Nav.Link>
                 {isAdmin && (
                   <Nav.Link
@@ -71,7 +72,8 @@ const NavBar: React.FC = () => {
                     className="text-warning fw-bold"
                     active={pathname === '/admin-dashboard'}
                   >
-                    <GearFill className="me-1" /> Admin
+                    <GearFill className="me-1" />
+                    <span>Admin</span>
                   </Nav.Link>
                 )}
               </>
@@ -81,7 +83,7 @@ const NavBar: React.FC = () => {
           <Nav>
             {session ? (
               <NavDropdown
-                title={
+                title={(
                   <span className="text-white fw-medium">
                     {user?.name?.split(' ')[0] || user?.email}
                     {isAdmin && (
@@ -90,18 +92,20 @@ const NavBar: React.FC = () => {
                       </Badge>
                     )}
                   </span>
-                }
+                )}
                 align="end"
               >
                 <NavDropdown.Item as={Link} href="/profile">
                   Profile
                 </NavDropdown.Item>
                 <NavDropdown.Item as={Link} href="/auth/change-password">
-                  <Lock className="me-2" /> Change Password
+                  <Lock className="me-2" />
+                  <span>Change Password</span>
                 </NavDropdown.Item>
                 <NavDropdown.Divider />
                 <NavDropdown.Item href="/api/auth/signout">
-                  <BoxArrowRight className="me-2" /> Sign Out
+                  <BoxArrowRight className="me-2" />
+                  <span>Sign Out</span>
                 </NavDropdown.Item>
               </NavDropdown>
             ) : (

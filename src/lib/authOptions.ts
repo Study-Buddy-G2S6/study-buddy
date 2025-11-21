@@ -3,7 +3,6 @@ import { compare } from 'bcrypt';
 import { type NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { prisma } from '@/lib/prisma';
-import adminEmails from './adminEmails';
 
 const authOptions: NextAuthOptions = {
   session: { strategy: 'jwt' },
@@ -30,8 +29,7 @@ const authOptions: NextAuthOptions = {
         return {
           id: user.id.toString(),
           email: user.email,
-          name: user.name ?? undefined,
-          role: user.role, // ← this is what your navbar reads
+          role: user.role,
         };
       },
     }),
@@ -44,16 +42,25 @@ const authOptions: NextAuthOptions = {
   callbacks: {
     jwt: ({ token, user }) => {
       if (user) {
-        token.id = user.id;
-        token.role = user.role;
+        return {
+          ...token,
+          id: (user as any).id,
+          role: (user as any).role,
+        };
       }
       return token;
     },
 
     session: ({ session, token }) => {
-      if (token) {
-        session.user.id = token.id as string;
-        session.user.role = token.role as string;
+      if (token && session.user) {
+        return {
+          ...session,
+          user: {
+            ...session.user,
+            id: (token as any).id,
+            role: (token as any).role,
+          },
+        };
       }
       return session;
     },
@@ -70,7 +77,7 @@ const authOptions: NextAuthOptions = {
     async redirect({ url, baseUrl }) {
       // After successful login → go straight to user-home
       if (url.startsWith('/')) return url;
-      return baseUrl + '/user-home';
+      return `${baseUrl}/user-home`;
     },
   },
 
