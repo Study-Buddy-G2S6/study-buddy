@@ -16,7 +16,7 @@ interface Course {
  * style attributes have been removed. The navbar and footer are intentionally
  * omitted; everything needed is contained in the main card content.
  */
-const UserProfile = async () => {
+const UserProfile = () => {
   // Default data for the profile page
   const name = 'Alice A. Kamu';
   const avatarSrc = '/assets/img/avatar-placeholder.svg';
