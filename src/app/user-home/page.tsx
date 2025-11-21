@@ -16,7 +16,11 @@ export default async function UserHome() {
     <>
       <Container fluid className="text-white text-center py-5" style={{ background: '#003300' }}>
         <Image src="/uh-seal.png" alt="UH Mānoa" width={110} height={110} priority />
-        <h1 className="display-4 fw-bold mt-4">Aloha, {name}!</h1>
+        <h1 className="display-4 fw-bold mt-4">
+          Aloha,&nbsp;
+          {name}
+          !
+        </h1>
         <p className="lead fs-3">ICS Study Session Hub</p>
       </Container>
 
