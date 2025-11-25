@@ -67,13 +67,49 @@ export async function deleteStuff(id: number) {
  * Creates a new user in the database.
  * @param credentials, an object with the following properties: email, password.
  */
-export async function createUser(credentials: { email: string; password: string }) {
+export async function createUser(credentials: {
+  email: string;
+  password: string;
+  userName: string;
+  description: string;
+  // Accept a flexible courses payload: existing Course objects (with id),
+  // an array of courseName strings, or objects with courseName/courseTitle.
+  courses?: Array<{ id?: number; courseName?: string; courseTitle?: string } | string>;
+}) {
   // console.log(`createUser data: ${JSON.stringify(credentials, null, 2)}`);
   const password = await hash(credentials.password, 10);
+
+  const providedCourses = credentials.courses ?? [];
+
+  // Determine how to attach courses: connect by id, or create new Course records.
+  let coursesPayload: any;
+  if (providedCourses.length > 0) {
+    const first = providedCourses[0] as any;
+    if (typeof first === 'object' && first !== null && 'id' in first && first.id) {
+      // connect existing course records by id
+      coursesPayload = { connect: providedCourses.map((c: any) => ({ id: c.id })) };
+    } else if (typeof first === 'string') {
+      // array of courseName strings -> create Course records with courseTitle same as name
+      coursesPayload = {
+        create: (providedCourses as string[]).map((name) => ({ courseName: name, courseTitle: name })),
+      };
+    } else {
+      // array of objects with courseName/courseTitle -> create Course records
+      coursesPayload = {
+        create: (providedCourses as any[]).map((c) => ({
+          courseName: c.courseName, courseTitle: c.courseTitle ?? c.courseName,
+        })),
+      };
+    }
+  }
+
   await prisma.user.create({
     data: {
       email: credentials.email,
       password,
+      userName: credentials.userName ?? credentials.email,
+      description: credentials.description,
+      ...(coursesPayload ? { courses: coursesPayload } : {}),
     },
   });
 }
