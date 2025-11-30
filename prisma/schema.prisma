@@ -23,23 +23,35 @@ enum Role {
 }
 
 model User {
-  id            Int       @id @default(autoincrement())
-  email         String    @unique
+  id            Int            @id @default(autoincrement())
+  email         String         @unique
   password      String
-  role          Role      @default(USER)
+  role          Role           @default(USER)
   userName      String?
   description   String?
-  points        Int       @default(0)
-  profileImage  Bytes?
+  points        Int            @default(0)
+  profileImage  String?
   courses       Course[]
+  courseToUsers CourseToUser[]
 }
 
 model Course {
-  id          Int     @id @default(autoincrement())
-  userId      Int
-  user        User    @relation(fields: [userId], references: [id])
-  courseName  String
-  courseTitle String
+  id            Int            @id @default(autoincrement())
+  userId        Int
+  user          User           @relation(fields: [userId], references: [id])
+  courseName    String
+  courseTitle   String
+  courseToUsers CourseToUser[]
+}
+
+model CourseToUser {
+  id       Int    @id @default(autoincrement())
+  userId   Int
+  user     User   @relation(fields: [userId], references: [id])
+  courseId Int
+  course   Course @relation(fields: [courseId], references: [id])
+  // Ensure a user cannot be enrolled in the same course more than once.
+  @@unique([userId, courseId])
 }
 
 enum Condition {

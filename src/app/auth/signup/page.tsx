@@ -49,7 +49,10 @@ type SignUpForm = {
 /** The sign up page. */
 const SignUp = () => {
   const validationSchema = Yup.object().shape({
-    email: Yup.string().required('Email is required').email('Email is invalid'),
+    email: Yup.string()
+      .required('Email is required')
+      .email('Email is invalid')
+      .matches(/@hawaii.edu$/i, 'Email must be a hawaii.edu address'),
     password: Yup.string()
       .required('Password is required')
       .min(6, 'Password must be at least 6 characters')
@@ -97,6 +100,7 @@ const SignUp = () => {
       userName: data.userName ?? data.email,
       description: data.description ?? '',
       courses: courseObjects,
+      profileImage: '/default-profile.png',
     });
 
     // After creating, signIn with redirect to the add page

@@ -72,6 +72,7 @@ export async function createUser(credentials: {
   password: string;
   userName: string;
   description: string;
+  profileImage: string;
   // Accept a flexible courses payload: existing Course objects (with id),
   // an array of courseName strings, or objects with courseName/courseTitle.
   courses?: Array<{ id?: number; courseName?: string; courseTitle?: string } | string>;
@@ -109,6 +110,7 @@ export async function createUser(credentials: {
       password,
       userName: credentials.userName ?? credentials.email,
       description: credentials.description,
+      profileImage: credentials.profileImage,
       ...(coursesPayload ? { courses: coursesPayload } : {}),
     },
   });
