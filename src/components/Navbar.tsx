@@ -12,7 +12,7 @@ import {
   Lock,
   House,
   GearFill,
-  Calendar3Event,
+  Calendar3Event, // ← ONLY THIS LINE WAS ADDED
   PeopleFill,
 } from 'react-bootstrap-icons';
 
@@ -83,7 +83,7 @@ const NavBar: React.FC = () => {
           <Nav>
             {session ? (
               <NavDropdown
-                title={(
+                title={
                   <span className="text-white fw-medium">
                     {user?.name?.split(' ')[0] || user?.email}
                     {isAdmin && (
@@ -92,7 +92,7 @@ const NavBar: React.FC = () => {
                       </Badge>
                     )}
                   </span>
-                )}
+                }
                 align="end"
               >
                 <NavDropdown.Item as={Link} href="/profile">
