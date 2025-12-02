@@ -30,8 +30,8 @@ const CreateSessionPage: React.FC = () => {
     startDate: Yup.string().required('Start date is required'),
     endDate: Yup.string()
       .required('End date is required')
-      .test('is-after-start', 'End date must be after start date', function test(value) {
-        const { startDate } = this.parent;
+      .test('is-after-start', 'End date must be after start date', (value, context) => {
+        const { startDate } = context.parent;
         if (!startDate || !value) return true;
         return new Date(value) > new Date(startDate);
       }),
