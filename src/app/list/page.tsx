@@ -1,53 +1,29 @@
+// src/app/list/page.tsx
 import { getServerSession } from 'next-auth';
-import { Col, Container, Row, Table } from 'react-bootstrap';
-import { prisma } from '@/lib/prisma';
-import StuffItem from '@/components/StuffItem';
-import { loggedInProtectedPage } from '@/lib/page-protection';
 import authOptions from '@/lib/authOptions';
+import { redirect } from 'next/navigation';
+import Link from 'next/link';
+import { Button, Container } from 'react-bootstrap';
 
-/** Render a list of stuff for the logged in user. */
-const ListPage = async () => {
-  // Protect the page, only logged in users can access it.
+export default async function StudySessionsList() {
   const session = await getServerSession(authOptions);
-  loggedInProtectedPage(
-    session as {
-      user: { email: string; id: string; randomKey: string };
-      // eslint-disable-next-line @typescript-eslint/comma-dangle
-    } | null,
-  );
-  const owner = (session && session.user && session.user.email) || '';
-  const stuff = await prisma.stuff.findMany({
-    where: {
-      owner,
-    },
-  });
-  // console.log(stuff);
-  return (
-    <main>
-      <Container id="list" fluid className="py-3">
-        <Row>
-          <Col>
-            <h1>Stuff</h1>
-            <Table striped bordered hover>
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Quantity</th>
-                  <th>Condition</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {stuff.map((item) => (
-                  <StuffItem key={item.id} {...item} />
-                ))}
-              </tbody>
-            </Table>
-          </Col>
-        </Row>
-      </Container>
-    </main>
-  );
-};
+  if (!session?.user) redirect('/auth/signin');
 
-export default ListPage;
+  return (
+    <Container className="my-5 py-5 text-center">
+      <h1 className="display-5 fw-bold mb-5 text-success">Study Sessions</h1>
+      <div className="bg-white shadow-lg rounded-4 p-5 mx-auto" style={{ maxWidth: '700px' }}>
+        <h2 className="text-primary mb-4">Coming Soon!</h2>
+        <p className="lead text-muted mb-4">Create, join, and manage ICS study sessions with your classmates.</p>
+        <p className="text-muted">This feature is under active development by the Study Buddy team.</p>
+        <div className="mt-5">
+          <Link href="/user-home">
+            <Button variant="success" size="lg">
+              Back to Home
+            </Button>
+          </Link>
+        </div>
+      </div>
+    </Container>
+  );
+}

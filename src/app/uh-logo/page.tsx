@@ -9,9 +9,17 @@ const UHLogoPage: React.FC = () => (
     <Container className="d-flex justify-content-center">
       <div style={{ textAlign: 'center' }}>
         <div className="uh-logo-container">
-          <Image src="/uhlogo.png" width={160} height={160} alt="University of Hawaiʻi Mānoa - Study Buddy" className="uh-logo-img" />
+          <Image
+            src="/uhlogo.png"
+            width={160}
+            height={160}
+            alt="University of Hawaiʻi Mānoa - Study Buddy"
+            className="uh-logo-img"
+          />
         </div>
-        <h2 style={{ marginTop: '1rem', color: '#0b5f3d' }}>University of Hawaiʻi Mānoa — Study Buddy</h2>
+        <h2 style={{ marginTop: '1rem', color: '#0b5f3d' }}>
+          University of Hawaiʻi Mānoa — Study Buddy
+        </h2>
       </div>
     </Container>
   </div>

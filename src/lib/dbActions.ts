@@ -67,13 +67,54 @@ export async function deleteStuff(id: number) {
  * Creates a new user in the database.
  * @param credentials, an object with the following properties: email, password.
  */
-export async function createUser(credentials: { email: string; password: string }) {
+export async function createUser(credentials: {
+  email: string;
+  password: string;
+  userName: string;
+  description: string;
+  profileImage: string;
+  // Accept a flexible courses payload: existing Course objects (with id),
+  // an array of courseName strings, or objects with courseName/courseTitle.
+  courses?: Array<{ id?: number; courseName?: string; courseTitle?: string } | string>;
+}) {
   // console.log(`createUser data: ${JSON.stringify(credentials, null, 2)}`);
   const password = await hash(credentials.password, 10);
+
+  const providedCourses = credentials.courses ?? [];
+
+  // Determine how to attach courses using the join model `CourseToUser`.
+  // Build a nested `courseToUsers` payload for prisma.user.create.
+  let courseToUsersPayload: any;
+  if (providedCourses.length > 0) {
+    const first = providedCourses[0] as any;
+    if (typeof first === 'object' && first !== null && 'id' in first && first.id) {
+      // connect existing course records by id via CourseToUser entries
+      courseToUsersPayload = {
+        create: (providedCourses as any[]).map((c) => ({ course: { connect: { id: c.id } } })),
+      };
+    } else if (typeof first === 'string') {
+      // array of courseName strings -> create Course records and CourseToUser entries
+      courseToUsersPayload = {
+        create: (providedCourses as string[]).map((name) => ({
+          course: { create: { courseName: name, courseTitle: name } } })),
+      };
+    } else {
+      // array of objects with courseName/courseTitle -> create Course and CourseToUser entries
+      courseToUsersPayload = {
+        create: (providedCourses as any[]).map((c) => ({
+          course: { create: { courseName: c.courseName, courseTitle: c.courseTitle ?? c.courseName } } })),
+      };
+    }
+  }
+
   await prisma.user.create({
     data: {
       email: credentials.email,
       password,
+      userName: credentials.userName ?? credentials.email,
+      description: credentials.description,
+      profileImage: credentials.profileImage,
+      ...(courseToUsersPayload ? { courseToUsers: courseToUsersPayload } : {}),
     },
   });
 }
