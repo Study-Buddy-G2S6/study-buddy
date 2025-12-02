@@ -55,20 +55,11 @@ const HomeContent = () => {
                   <Row>
                     <Col className="d-flex justify-content-center align-items-center mb-3">
                       <Button
-                        variant="light"
-                        className="btn btn-google d-flex align-items-center"
-                        title="Sign in with Google"
-                        onClick={() => signIn('google')}
+                        variant="success"
+                        size="lg"
+                        onClick={() => signIn()}
                       >
-                        <Image
-                          src="/google-logo.svg"
-                          width={18}
-                          height={18}
-                          alt=""
-                          aria-hidden="true"
-                          className="me-2"
-                        />
-                        Login with Google
+                        Sign In
                       </Button>
                     </Col>
                   </Row>
@@ -90,20 +81,11 @@ const HomeContent = () => {
                   <Row>
                     <Col className="d-flex justify-content-center align-items-center mb-3">
                       <Button
-                        variant="light"
-                        className="btn btn-google d-flex align-items-center"
-                        title="Sign in with Google"
-                        onClick={() => signIn('google')}
+                        variant="success"
+                        size="lg"
+                        onClick={() => signIn()}
                       >
-                        <Image
-                          src="/google-logo.svg"
-                          width={18}
-                          height={18}
-                          alt=""
-                          aria-hidden="true"
-                          className="me-2"
-                        />
-                        Sign in with Google
+                        Sign In with UH Account
                       </Button>
                     </Col>
                   </Row>
