@@ -31,17 +31,16 @@ model User {
   description   String?
   points        Int            @default(0)
   profileImage  String?
-  courses       Course[]
   courseToUsers CourseToUser[]
+  sessions      Session[]
 }
 
 model Course {
-  id            Int            @id @default(autoincrement())
-  userId        Int
-  user          User           @relation(fields: [userId], references: [id])
-  courseName    String
-  courseTitle   String
-  courseToUsers CourseToUser[]
+  id                Int            @id @default(autoincrement())
+  courseName        String
+  courseTitle       String
+  courseToUsers     CourseToUser[]
+  sessions          Session[]
 }
 
 model CourseToUser {
@@ -50,6 +49,7 @@ model CourseToUser {
   user     User   @relation(fields: [userId], references: [id])
   courseId Int
   course   Course @relation(fields: [courseId], references: [id])
+
   // Ensure a user cannot be enrolled in the same course more than once.
   @@unique([userId, courseId])
 }
@@ -67,4 +67,17 @@ model Stuff {
   quantity  Int
   condition Condition @default(good)
   owner     String
+}
+
+model Session {
+  id                Int             @id @default(autoincrement())
+  name              String
+  description       String
+  userId            Int
+  user              User            @relation(fields: [userId], references: [id])
+  courseId  Int
+  course    Course  @relation(fields: [courseId], references: [id])
+  startDate         DateTime
+  endDate           DateTime
+  owner             String
 }
