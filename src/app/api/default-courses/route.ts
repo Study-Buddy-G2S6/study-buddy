@@ -1,3 +1,5 @@
+/* eslint-disable import/prefer-default-export */
+
 import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
@@ -17,6 +19,4 @@ export async function GET() {
   }
 }
 
-// Provide a default export to satisfy "prefer default export" linters while
-// keeping the named `GET` handler that Next's App Router requires.
-export default GET;
+// No default export: Next App Router requires named exports per HTTP method.

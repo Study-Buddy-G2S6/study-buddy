@@ -82,24 +82,27 @@ export async function createUser(credentials: {
 
   const providedCourses = credentials.courses ?? [];
 
-  // Determine how to attach courses: connect by id, or create new Course records.
-  let coursesPayload: any;
+  // Determine how to attach courses using the join model `CourseToUser`.
+  // Build a nested `courseToUsers` payload for prisma.user.create.
+  let courseToUsersPayload: any;
   if (providedCourses.length > 0) {
     const first = providedCourses[0] as any;
     if (typeof first === 'object' && first !== null && 'id' in first && first.id) {
-      // connect existing course records by id
-      coursesPayload = { connect: providedCourses.map((c: any) => ({ id: c.id })) };
+      // connect existing course records by id via CourseToUser entries
+      courseToUsersPayload = {
+        create: (providedCourses as any[]).map((c) => ({ course: { connect: { id: c.id } } })),
+      };
     } else if (typeof first === 'string') {
-      // array of courseName strings -> create Course records with courseTitle same as name
-      coursesPayload = {
-        create: (providedCourses as string[]).map((name) => ({ courseName: name, courseTitle: name })),
+      // array of courseName strings -> create Course records and CourseToUser entries
+      courseToUsersPayload = {
+        create: (providedCourses as string[]).map((name) => ({
+          course: { create: { courseName: name, courseTitle: name } } })),
       };
     } else {
-      // array of objects with courseName/courseTitle -> create Course records
-      coursesPayload = {
+      // array of objects with courseName/courseTitle -> create Course and CourseToUser entries
+      courseToUsersPayload = {
         create: (providedCourses as any[]).map((c) => ({
-          courseName: c.courseName, courseTitle: c.courseTitle ?? c.courseName,
-        })),
+          course: { create: { courseName: c.courseName, courseTitle: c.courseTitle ?? c.courseName } } })),
       };
     }
   }
@@ -111,7 +114,7 @@ export async function createUser(credentials: {
       userName: credentials.userName ?? credentials.email,
       description: credentials.description,
       profileImage: credentials.profileImage,
-      ...(coursesPayload ? { courses: coursesPayload } : {}),
+      ...(courseToUsersPayload ? { courseToUsers: courseToUsersPayload } : {}),
     },
   });
 }

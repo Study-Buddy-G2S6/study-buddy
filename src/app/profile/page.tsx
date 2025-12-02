@@ -23,14 +23,19 @@ const UserProfile = async () => {
   if (userId) {
     const userBasic = await prisma.user.findUnique({ where: { id: userId } });
 
-    // Fetch courses the user is a part of
+    // Fetch courses the user is a part of.
+    // `Course` doesn't have a `userId` scalar field; instead, a course is
+    // related to users through the `CourseToUser` join model, and may be
+    // related to sessions via `sessions` (which have `userId`). Query the
+    // related fields using `some` filters.
     const courses = await prisma.course.findMany({
       where: {
         OR: [
-          { userId },
+          { sessions: { some: { userId } } },
           { courseToUsers: { some: { userId } } },
         ],
       },
+      orderBy: { courseName: 'asc' },
     });
 
     fullUser = userBasic ? { ...userBasic, courses } : null;
