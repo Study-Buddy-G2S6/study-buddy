@@ -133,3 +133,81 @@ export async function changePassword(credentials: { email: string; password: str
     },
   });
 }
+
+/**
+ * Creates a new study session in the database.
+ * @param session, an object with the following properties: name, description, startDate, endDate, courseName, owner.
+ */
+export async function createSession(session: {
+  name: string;
+  description: string;
+  startDate: string;
+  endDate: string;
+  courseName: string;
+  owner: string;
+}) {
+  // Find the user by email
+  const user = await prisma.user.findUnique({
+    where: { email: session.owner },
+  });
+
+  if (!user) {
+    throw new Error('User not found');
+  }
+
+  // Find or create the course
+  let course = await prisma.course.findFirst({
+    where: { courseName: session.courseName },
+  });
+
+  if (!course) {
+    course = await prisma.course.create({
+      data: {
+        courseName: session.courseName,
+        courseTitle: session.courseName,
+      },
+    });
+  }
+
+  // Create the session
+  await prisma.session.create({
+    data: {
+      name: session.name,
+      description: session.description,
+      startDate: new Date(session.startDate),
+      endDate: new Date(session.endDate),
+      owner: session.owner,
+      userId: user.id,
+      courseId: course.id,
+    },
+  });
+
+  // After creating, redirect to the sessions page
+  redirect('/sessions');
+}
+
+/**
+ * Fetches all study sessions from the database with course and user information.
+ */
+export async function getSessions() {
+  const sessions = await prisma.session.findMany({
+    include: {
+      course: true,
+      user: true,
+    },
+    orderBy: {
+      startDate: 'asc',
+    },
+  });
+
+  return sessions.map(session => ({
+    id: session.id,
+    name: session.name,
+    description: session.description,
+    startDate: session.startDate.toISOString(),
+    endDate: session.endDate.toISOString(),
+    owner: session.owner,
+    course: session.course.courseName,
+    courseTitle: session.course.courseTitle,
+  }));
+}

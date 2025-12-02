@@ -58,7 +58,7 @@ const NavBar: React.FC = () => {
                   <PeopleFill className="me-1" />
                   <span>Study Sessions</span>
                 </Nav.Link>
-                <Nav.Link as={Link} href="/sessions/create" active={pathname === '/sessions/create'}>
+                <Nav.Link as={Link} href="/create-session" active={pathname === '/create-session'}>
                   Create Session
                 </Nav.Link>
                 <Nav.Link as={Link} href="/calendar" active={pathname === '/calendar'}>
