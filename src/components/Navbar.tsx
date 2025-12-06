@@ -54,11 +54,11 @@ const NavBar: React.FC = () => {
                   <House className="me-1" />
                   <span>Home</span>
                 </Nav.Link>
-                <Nav.Link as={Link} href="/sessions" active={pathname.startsWith('/sessions')}>
+                <Nav.Link as={Link} href="/session" active={pathname.startsWith('/session')}>
                   <PeopleFill className="me-1" />
                   <span>Study Sessions</span>
                 </Nav.Link>
-                <Nav.Link as={Link} href="/sessions/create" active={pathname === '/sessions/create'}>
+                <Nav.Link as={Link} href="/session/add" active={pathname === '/session/add'}>
                   Create Session
                 </Nav.Link>
                 <Nav.Link as={Link} href="/calendar" active={pathname === '/calendar'}>

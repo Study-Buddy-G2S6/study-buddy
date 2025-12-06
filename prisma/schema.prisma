@@ -70,14 +70,22 @@ model Stuff {
 }
 
 model Session {
-  id                Int             @id @default(autoincrement())
-  name              String
-  description       String
-  userId            Int
-  user              User            @relation(fields: [userId], references: [id])
-  courseId  Int
-  course    Course  @relation(fields: [courseId], references: [id])
-  startDate         DateTime
-  endDate           DateTime
-  owner             String
+  id          Int       @id @default(autoincrement())
+  name        String
+  courseId    Int
+  course      Course    @relation(fields: [courseId], references: [id])
+  location    String
+  description String
+  startDate   DateTime
+  endDate     DateTime
+  userId      Int
+  user        User      @relation(fields: [userId], references: [id])
+  owner       String
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([courseId])
+  @@index([startDate])
 }
