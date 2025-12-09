@@ -37,7 +37,7 @@ model User {
 
 model Course {
   id                Int            @id @default(autoincrement())
-  courseName        String
+  courseName        String         @unique
   courseTitle       String
   courseToUsers     CourseToUser[]
   sessions          Session[]
@@ -75,7 +75,7 @@ model Session {
   courseId    Int
   course      Course    @relation(fields: [courseId], references: [id])
   location    String
-  description String
+  description String?
   startDate   DateTime
   endDate     DateTime
   userId      Int

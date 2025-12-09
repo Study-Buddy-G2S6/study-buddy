@@ -75,6 +75,7 @@ const SignUp = () => {
   });
 
   const [coursesList, setCoursesList] = useState<{ courseName: string; courseTitle: string }[]>([]);
+  const [coursesDb, setCoursesDb] = useState<{ id: number; courseName: string; courseTitle: string }[]>([]);
   const [showCourses, setShowCourses] = useState(false);
 
   useEffect(() => {
@@ -83,12 +84,21 @@ const SignUp = () => {
       .then((r) => r.json())
       .then((json) => setCoursesList(json))
       .catch(() => setCoursesList([]));
+
+    // fetch actual DB courses (if you've seeded them) so we can connect by id
+    fetch('/api/courses')
+      .then((r) => r.json())
+      .then((json) => setCoursesDb(json))
+      .catch(() => setCoursesDb([]));
   }, []);
 
   const onSubmit = async (data: SignUpForm) => {
     // map the selected course names to objects so the server action can create/connect them
     const selected = data.courses ?? [];
+    // prefer to send objects with `id` when the course exists in the DB so createUser connects
     const courseObjects = selected.map((name) => {
+      const foundDb = coursesDb.find((c) => c.courseName === name);
+      if (foundDb) return { id: foundDb.id, courseName: foundDb.courseName, courseTitle: foundDb.courseTitle };
       const found = coursesList.find((c) => c.courseName === name);
       return { courseName: name, courseTitle: found?.courseTitle ?? name };
     });

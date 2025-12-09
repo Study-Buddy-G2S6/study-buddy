@@ -9,7 +9,12 @@ import { prisma } from './prisma';
  * Adds a new stuff to the database.
  * @param stuff, an object with the following properties: name, quantity, owner, condition.
  */
-export async function addStuff(stuff: { name: string; quantity: number; owner: string; condition: string }) {
+export async function addStuff(stuff: {
+  name: string;
+  quantity: number;
+  owner: string;
+  condition: string;
+}) {
   // console.log(`addStuff data: ${JSON.stringify(stuff, null, 2)}`);
   let condition: Condition = 'good';
   if (stuff.condition === 'poor') {
@@ -61,6 +66,33 @@ export async function deleteStuff(id: number) {
   });
   // After deleting, redirect to the list page
   redirect('/list');
+}
+
+export async function createSession(session: {
+  name: string;
+  courseId: number;
+  location: string;
+  description?: string;
+  startDate: Date;
+  endDate: Date;
+  userId: number;
+  owner: string;
+  createdAt: Date;
+  updatedAt: Date;
+}) {
+  await prisma.session.create({
+    data: {
+      name: session.name,
+      userId: session.userId,
+      courseId: session.courseId,
+      location: session.location,
+      description: session.description || '',
+      startDate: session.startDate,
+      endDate: session.endDate,
+      owner: session.owner,
+    },
+  });
+  redirect('/calendar');
 }
 
 /**

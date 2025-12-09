@@ -21,6 +21,19 @@ async function main() {
     });
     // console.log(`  Created user: ${user.email} with role: ${user.role}`);
   });
+  // sequentially, preserve order of loop, upsert by courseName
+  for (const course of config.defaultCourses) {
+    console.log(`  Adding course: ${course.courseName}`);
+    // eslint-disable-next-line no-await-in-loop
+    await prisma.course.upsert({
+      where: { courseName: course.courseName }, // requires courseName to be unique in Prisma schema
+      update: {},
+      create: {
+        courseName: course.courseName,
+        courseTitle: course.courseTitle,
+      },
+    });
+  }
   for (const data of config.defaultData) {
     const condition = data.condition as Condition || Condition.good;
     console.log(`  Adding stuff: ${JSON.stringify(data)}`);
