@@ -1,9 +1,9 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
   try {
-    const { searchParams } = new URL(req.url);
+    const { searchParams } = req.nextUrl;
     const userIdParam = searchParams.get('userId');
     if (!userIdParam) return NextResponse.json({ error: 'userId required' }, { status: 400 });
 

@@ -1,9 +1,9 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   try {
-    const url = new URL(request.url);
+    const url = request.nextUrl;
     const name = url.searchParams.get('name');
     if (!name) {
       return NextResponse.json({ error: 'Missing course name' }, { status: 400 });
