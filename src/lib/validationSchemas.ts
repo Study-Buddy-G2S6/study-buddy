@@ -27,3 +27,17 @@ export const CreateSessionSchema = Yup.object({
   createdAt: Yup.date().required(),
   updatedAt: Yup.date().required(),
 });
+
+export const EditSessionSchema = Yup.object({
+  id: Yup.number().required(),
+  name: Yup.string().required(),
+  courseId: Yup.number().required(),
+  location: Yup.string().required(),
+  description: Yup.string().optional(),
+  startDate: Yup.date().required(),
+  endDate: Yup.date().required(),
+  userId: Yup.number().required(),
+  owner: Yup.string().required(),
+  createdAt: Yup.date().required(),
+  updatedAt: Yup.date().required(),
+});

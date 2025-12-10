@@ -1,6 +1,6 @@
 'use server';
 
-import { Stuff, Condition } from '@prisma/client';
+import { Stuff, Condition, Session } from '@prisma/client';
 import { hash } from 'bcrypt';
 import { redirect } from 'next/navigation';
 import { prisma } from './prisma';
@@ -95,6 +95,30 @@ export async function createSession(session: {
   redirect('/calendar');
 }
 
+export async function editSession(session: Session) {
+  await prisma.session.update({
+    where: { id: session.id },
+    data: {
+      name: session.name,
+      userId: session.userId,
+      courseId: session.courseId,
+      location: session.location,
+      description: session.description || '',
+      startDate: session.startDate,
+      endDate: session.endDate,
+      owner: session.owner,
+    },
+  });
+  redirect('/calendar');
+}
+
+export async function deleteSession(id: number) {
+  await prisma.session.delete({
+    where: { id },
+  });
+  redirect('/session/my-sessions');
+}
+
 /**
  * Creates a new user in the database.
  * @param credentials, an object with the following properties: email, password.
@@ -164,4 +188,24 @@ export async function changePassword(credentials: { email: string; password: str
       password,
     },
   });
+}
+
+export async function getCourseById(courseId: number) {
+  return prisma.course.findUnique({
+    where: { id: courseId },
+  });
+}
+
+export async function getUserById(userId: number) {
+  return prisma.user.findUnique({
+    where: { id: userId },
+  });
+}
+
+export async function getCourseAndUserById(courseId: number, userId: number) {
+  const [course, user] = await Promise.all([
+    prisma.course.findUnique({ where: { id: courseId } }),
+    prisma.user.findUnique({ where: { id: userId } }),
+  ]);
+  return { course, user };
 }

@@ -14,6 +14,7 @@ import {
   GearFill,
   Calendar3Event,
   PeopleFill,
+  PersonFill,
 } from 'react-bootstrap-icons';
 
 const NavBar: React.FC = () => {
@@ -57,6 +58,10 @@ const NavBar: React.FC = () => {
                 <Nav.Link as={Link} href="/session" active={pathname.startsWith('/session')}>
                   <PeopleFill className="me-1" />
                   <span>Study Sessions</span>
+                </Nav.Link>
+                <Nav.Link as={Link} href="/session/my-sessions" active={pathname.startsWith('/session/my-sessions')}>
+                  <PersonFill className="me-1" />
+                  <span>My Sessions</span>
                 </Nav.Link>
                 <Nav.Link as={Link} href="/session/add" active={pathname === '/session/add'}>
                   Create Session
