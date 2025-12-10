@@ -7,7 +7,7 @@ export async function GET(
 ) {
   try {
     const courseId = Number(params.id);
-    
+
     if (Number.isNaN(courseId)) {
       return NextResponse.json({ error: 'Invalid course ID' }, { status: 400 });
     }
@@ -26,3 +26,5 @@ export async function GET(
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
+
+export default GET;
