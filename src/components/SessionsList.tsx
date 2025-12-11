@@ -65,7 +65,12 @@ const SessionsList = ({ sessions, currentUserEmail }: SessionsListProps) => {
                 </InputGroup>
                 {searchQuery && (
                   <small className="text-muted">
-                    Found {filteredSessions.length} session{filteredSessions.length !== 1 ? 's' : ''}
+                    Found
+                    {' '}
+                    {filteredSessions.length}
+                    {' '}
+                    session
+                    {filteredSessions.length !== 1 ? 's' : ''}
                   </small>
                 )}
               </Col>

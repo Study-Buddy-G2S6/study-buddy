@@ -29,11 +29,11 @@ const StudySessionsPage = async () => {
   const sortedSessions = allSessions.sort((a, b) => {
     const aIsOwner = a.owner === currentUserEmail;
     const bIsOwner = b.owner === currentUserEmail;
-    
+
     // If one is owner and other isn't, owner comes first
     if (aIsOwner && !bIsOwner) return -1;
     if (!aIsOwner && bIsOwner) return 1;
-    
+
     // If both are same ownership status, sort by startDate
     return new Date(a.startDate).getTime() - new Date(b.startDate).getTime();
   });

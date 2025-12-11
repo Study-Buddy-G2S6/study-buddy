@@ -35,7 +35,7 @@ const CreateSessionForm = () => {
   const currentUser = session?.user?.email || '';
   const [coursesList, setCoursesList] = useState<{ courseName: string; courseTitle: string; }[]>([]);
   const [userId, setUserId] = useState<number | null>(null);
-  
+
   useEffect(() => {
     // fetch the default courses from the new api route
     fetch('/api/default-courses')
