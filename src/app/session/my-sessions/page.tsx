@@ -42,8 +42,7 @@ const ListPage = async () => {
         <Row>
           <Col>
             <h1 className="text-center">
-              {user?.userName || 'My'}
-              &apos;s Sessions
+              {user?.userName ? `${user.userName}'s Sessions` : 'My Sessions'}
             </h1>
             <Row xs={1} md={2} lg={3} className="g-4">
               {sessions.map((session) => (
@@ -52,6 +51,7 @@ const ListPage = async () => {
                     session={session}
                     user={session.user as User}
                     course={session.course as Course}
+                    showActions={true}
                   />
                 </Col>
               ))}

@@ -4,7 +4,7 @@ import { Session, User, Course } from '@prisma/client';
 import { Button, Card, Row, Col } from 'react-bootstrap';
 import { deleteSession } from '@/lib/dbActions';
 
-const SessionCard = ({ session, course, user }: { session: Session; course: Course; user: User }) => (
+const SessionCard = ({ session, course, user, showActions = false }: { session: Session; course: Course; user: User; showActions?: boolean }) => (
   <Card className="w-100">
     <Card.Header>
       <Card.Title>
@@ -31,18 +31,20 @@ const SessionCard = ({ session, course, user }: { session: Session; course: Cour
         {`Description: ${session.description}`}
       </Card.Text>
     </Card.Body>
-    <Card.Footer>
-      <Row>
-        <Col xs="auto" className="me-auto">
-          <Button type="button" href={`edit/${session.id}`}>Edit</Button>
-        </Col>
-        <Col xs="auto" className="ms-auto">
-          <Button type="button" onClick={() => deleteSession(session.id)} variant="danger" className="ms-2">
-            Delete
-          </Button>
-        </Col>
-      </Row>
-    </Card.Footer>
+    {showActions && (
+      <Card.Footer>
+        <Row>
+          <Col xs="auto" className="me-auto">
+            <Button type="button" href={`edit/${session.id}`}>Edit</Button>
+          </Col>
+          <Col xs="auto" className="ms-auto">
+            <Button type="button" onClick={() => deleteSession(session.id)} variant="danger" className="ms-2">
+              Delete
+            </Button>
+          </Col>
+        </Row>
+      </Card.Footer>
+    )}
   </Card>
 );
 
