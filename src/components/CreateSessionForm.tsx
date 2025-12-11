@@ -34,6 +34,8 @@ const CreateSessionForm = () => {
   const { data: session, status } = useSession();
   const currentUser = session?.user?.email || '';
   const [coursesList, setCoursesList] = useState<{ courseName: string; courseTitle: string; }[]>([]);
+  const [userId, setUserId] = useState<number | null>(null);
+  
   useEffect(() => {
     // fetch the default courses from the new api route
     fetch('/api/default-courses')
@@ -41,6 +43,21 @@ const CreateSessionForm = () => {
       .then((json) => setCoursesList(json))
       .catch(() => setCoursesList([]));
   }, []);
+
+  useEffect(() => {
+    // Fetch the current user's ID from the database
+    if (currentUser) {
+      fetch(`/api/user-courses?email=${encodeURIComponent(currentUser)}`)
+        .then((r) => r.json())
+        .then((data) => {
+          if (data.userId) {
+            setUserId(data.userId);
+          }
+        })
+        .catch((err) => console.error('Failed to fetch user ID', err));
+    }
+  }, [currentUser]);
+
   const {
     register,
     handleSubmit,
@@ -171,7 +188,7 @@ const CreateSessionForm = () => {
             </Form.Group>
 
             <input type="hidden" {...register('owner')} value={currentUser} />
-            <input type="hidden" {...register('userId')} value={session?.user?.id} />
+            <input type="hidden" {...register('userId', { valueAsNumber: true })} value={userId || 0} />
             <input type="hidden" {...register('createdAt')} value={new Date().toISOString()} />
             <input type="hidden" {...register('updatedAt')} value={new Date().toISOString()} />
 
