@@ -15,7 +15,7 @@ import { Session } from '@prisma/client';
 const onSubmit = async (data: Omit<Session, 'description'> & { description?: string }) => {
   // console.log(`onSubmit data: ${JSON.stringify(data, null, 2)}`);
   await editSession(data as Session);
-  swal('Success', 'Your item has been added', 'success', {
+  swal('Success', 'Your session has been updated', 'success', {
     timer: 2000,
   });
 };
@@ -52,6 +52,14 @@ const EditSessionForm = ({ session }: { session: Session }) => {
   } = useForm({
     resolver: yupResolver(EditSessionSchema),
   });
+
+  // Initialize courseId in the form when session loads
+  useEffect(() => {
+    if (session.courseId) {
+      setValue('courseId', session.courseId, { shouldValidate: true });
+    }
+  }, [session.courseId, setValue]);
+
   if (status === 'loading') {
     return <LoadingSpinner />;
   }
@@ -205,7 +213,7 @@ const EditSessionForm = ({ session }: { session: Session }) => {
               <Row className="pt-3 justify-content-center">
                 <Col xs="auto" md="auto" lg="auto">
                   <Button type="submit" variant="primary" size="lg">
-                    Create Session
+                    Update Session
                   </Button>
                 </Col>
                 <Col xs="auto" md="auto" lg="auto">

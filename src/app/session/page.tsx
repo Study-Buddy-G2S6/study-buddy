@@ -38,7 +38,7 @@ const StudySessionsPage = async () => {
     return new Date(a.startDate).getTime() - new Date(b.startDate).getTime();
   });
 
-  console.log('All sessions count:', sortedSessions.length);
+  console.log('All sessions count: ', sortedSessions.length);
 
   return (
     <SessionsList sessions={sortedSessions} currentUserEmail={currentUserEmail} />

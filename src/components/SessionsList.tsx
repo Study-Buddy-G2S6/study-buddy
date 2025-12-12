@@ -4,8 +4,8 @@ import { useState } from 'react';
 import { Col, Container, Row, Badge, Form, InputGroup } from 'react-bootstrap';
 import Link from 'next/link';
 import { Session, User, Course } from '@prisma/client';
-import SessionCard from '@/components/SessionCard';
 import { Search } from 'react-bootstrap-icons';
+import SessionCard from '@/components/AllUsersSessionCard';
 
 type SessionWithRelations = Session & {
   user: User;
@@ -19,6 +19,7 @@ interface SessionsListProps {
 
 const SessionsList = ({ sessions, currentUserEmail }: SessionsListProps) => {
   const [searchQuery, setSearchQuery] = useState('');
+  const hasMySessions = sessions.some((session) => session.owner === currentUserEmail);
 
   // Filter sessions based on search query
   const filteredSessions = sessions.filter((session) => {
@@ -36,6 +37,20 @@ const SessionsList = ({ sessions, currentUserEmail }: SessionsListProps) => {
     ].join(' ').toLowerCase();
 
     return searchableText.includes(query);
+  });
+
+  // Sort by closest upcoming start date to now
+  const now = Date.now();
+  const sortedSessions = [...filteredSessions].sort((a, b) => {
+    const aTime = new Date(a.startDate).getTime();
+    const bTime = new Date(b.startDate).getTime();
+    // Earlier (closer to now) first; fallback to original order when invalid
+    if (Number.isNaN(aTime) && Number.isNaN(bTime)) return 0;
+    if (Number.isNaN(aTime)) return 1;
+    if (Number.isNaN(bTime)) return -1;
+    const diffA = Math.abs(aTime - now);
+    const diffB = Math.abs(bTime - now);
+    return diffA - diffB;
   });
 
   return (
@@ -65,19 +80,25 @@ const SessionsList = ({ sessions, currentUserEmail }: SessionsListProps) => {
                 </InputGroup>
                 {searchQuery && (
                   <small className="text-muted">
-                    Found
-                    {' '}
-                    {filteredSessions.length}
-                    {' '}
-                    session
-                    {filteredSessions.length !== 1 ? 's' : ''}
+                    {`Found ${filteredSessions.length} session${filteredSessions.length !== 1 ? 's' : ''}`}
                   </small>
                 )}
               </Col>
             </Row>
 
+            {/* "My Session" link displayed above all cards when user has sessions */}
+            {hasMySessions && (
+              <Row className="mb-4">
+                <Col className="d-flex justify-content-center">
+                  <Link href="/session/my-sessions" className="text-decoration-none">
+                    <Badge bg="primary" className="px-3 py-2">My Sessions</Badge>
+                  </Link>
+                </Col>
+              </Row>
+            )}
+
             {/* Sessions Display */}
-            {filteredSessions.length === 0 ? (
+            {sortedSessions.length === 0 ? (
               <p className="text-center">
                 {searchQuery
                   ? 'No sessions match your search. Try different keywords.'
@@ -85,27 +106,15 @@ const SessionsList = ({ sessions, currentUserEmail }: SessionsListProps) => {
               </p>
             ) : (
               <Row xs={1} md={2} lg={3} className="g-4">
-                {filteredSessions.map((session) => {
-                  const isMySession = session.owner === currentUserEmail;
-                  return (
-                    <Col key={session.id}>
-                      {isMySession && (
-                        <div className="mb-2">
-                          <Link href="/session/my-sessions" className="text-decoration-none">
-                            <Badge bg="primary" className="px-3 py-2">
-                              My Session
-                            </Badge>
-                          </Link>
-                        </div>
-                      )}
-                      <SessionCard
-                        session={session}
-                        user={session.user as User}
-                        course={session.course as Course}
-                      />
-                    </Col>
-                  );
-                })}
+                {sortedSessions.map((session) => (
+                  <Col key={session.id}>
+                    <SessionCard
+                      session={session}
+                      user={session.user as User}
+                      course={session.course as Course}
+                    />
+                  </Col>
+                ))}
               </Row>
             )}
           </Col>

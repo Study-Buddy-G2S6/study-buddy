@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
+// eslint-disable-next-line import/prefer-default-export
 export async function GET() {
   try {
     const courses = await prisma.course.findMany({ select: { id: true, courseName: true, courseTitle: true } });
@@ -10,5 +11,3 @@ export async function GET() {
     return NextResponse.json([], { status: 500 });
   }
 }
-
-export default GET;

@@ -30,7 +30,7 @@ export async function GET(req: NextRequest) {
     const courses = enrollments.map((e) => e.course);
     return NextResponse.json(courses);
   } catch (err) {
-    console.error('user-courses: failed to fetch enrolled courses', err);
+    console.error('user-courses: Failed to fetch enrolled courses', err);
     return NextResponse.json({ error: 'internal server error' }, { status: 500 });
   }
 }

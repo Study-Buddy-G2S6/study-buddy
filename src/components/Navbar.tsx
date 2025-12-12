@@ -66,7 +66,7 @@ const NavBar: React.FC = () => {
                 <Nav.Link as={Link} href="/session/add" active={pathname === '/session/add'}>
                   Create Session
                 </Nav.Link>
-                <Nav.Link as={Link} href="/calendar" active={pathname === '/calendar'}>
+                <Nav.Link as={Link} href="/calendar/all-sessions" active={pathname === '/calendar/all-sessions'}>
                   <Calendar3Event className="me-1" />
                   <span>Calendar</span>
                 </Nav.Link>

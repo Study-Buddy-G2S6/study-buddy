@@ -25,7 +25,7 @@ const onSubmit = async (data: {
 }) => {
   // console.log(`onSubmit data: ${JSON.stringify(data, null, 2)}`);
   await createSession(data);
-  swal('Success', 'Your item has been added', 'success', {
+  swal('Success', 'Your session has been created', 'success', {
     timer: 2000,
   });
 };
@@ -35,6 +35,17 @@ const CreateSessionForm = () => {
   const currentUser = session?.user?.email || '';
   const [coursesList, setCoursesList] = useState<{ courseName: string; courseTitle: string; }[]>([]);
   const [userId, setUserId] = useState<number | null>(null);
+  const [userIdError, setUserIdError] = useState<string | null>(null);
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    reset,
+    formState: { errors },
+  } = useForm({
+    resolver: yupResolver(CreateSessionSchema),
+  });
 
   useEffect(() => {
     // fetch the default courses from the new api route
@@ -52,21 +63,18 @@ const CreateSessionForm = () => {
         .then((data) => {
           if (data.userId) {
             setUserId(data.userId);
+            setValue('userId', data.userId, { shouldValidate: true });
+            setUserIdError(null);
+          } else {
+            setUserIdError('Unable to load your user ID. Please try again or re-login.');
           }
         })
-        .catch((err) => console.error('Failed to fetch user ID', err));
+        .catch((err) => {
+          console.error('Failed to fetch user ID', err);
+          setUserIdError('Unable to load your user ID. Please try again or re-login.');
+        });
     }
-  }, [currentUser]);
-
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    reset,
-    formState: { errors },
-  } = useForm({
-    resolver: yupResolver(CreateSessionSchema),
-  });
+  }, [currentUser, setValue]);
   if (status === 'loading') {
     return <LoadingSpinner />;
   }
@@ -188,14 +196,18 @@ const CreateSessionForm = () => {
             </Form.Group>
 
             <input type="hidden" {...register('owner')} value={currentUser} />
-            <input type="hidden" {...register('userId', { valueAsNumber: true })} value={userId || 0} />
+            <input type="hidden" {...register('userId', { valueAsNumber: true })} value={userId ?? ''} />
             <input type="hidden" {...register('createdAt')} value={new Date().toISOString()} />
             <input type="hidden" {...register('updatedAt')} value={new Date().toISOString()} />
+
+            {userIdError && (
+              <div className="text-danger mb-3">{userIdError}</div>
+            )}
 
             <Form.Group className="form-group">
               <Row className="pt-3 justify-content-center">
                 <Col xs="auto" md="auto" lg="auto">
-                  <Button type="submit" variant="primary" size="lg">
+                  <Button type="submit" variant="primary" size="lg" disabled={!userId}>
                     Create Session
                   </Button>
                 </Col>

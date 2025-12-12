@@ -31,7 +31,7 @@ model User {
   description   String?
   points        Int            @default(0)
   profileImage  String?
-  courseToUsers CourseToUser[]
+  courses       CourseToUser[]
   sessions      Session[]
 }
 
@@ -39,19 +39,17 @@ model Course {
   id                Int            @id @default(autoincrement())
   courseName        String         @unique
   courseTitle       String
-  courseToUsers     CourseToUser[]
+  users             CourseToUser[]
   sessions          Session[]
 }
 
 model CourseToUser {
-  id       Int    @id @default(autoincrement())
   userId   Int
   user     User   @relation(fields: [userId], references: [id])
   courseId Int
   course   Course @relation(fields: [courseId], references: [id])
 
-  // Ensure a user cannot be enrolled in the same course more than once.
-  @@unique([userId, courseId])
+  @@id([userId, courseId])
 }
 
 enum Condition {

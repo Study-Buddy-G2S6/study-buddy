@@ -1,18 +1,26 @@
 'use client';
 
-import React, { Suspense } from 'react';
+import React, { Suspense, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './globals.css';
 import { Container, Card, Button, Row, Col } from 'react-bootstrap';
 import Image from 'next/image';
-import { useSearchParams } from 'next/navigation';
-import { signIn } from 'next-auth/react';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { signIn, useSession } from 'next-auth/react';
 
 export const dynamic = 'force-dynamic';
 
 const HomeContent = () => {
   const params = useSearchParams();
+  const router = useRouter();
+  const { data: session } = useSession();
   const uhError = params?.get('uh_error') === '1';
+
+  useEffect(() => {
+    if (session?.user) {
+      router.push('/user-home');
+    }
+  }, [session, router]);
 
   return (
     <div className="site">
