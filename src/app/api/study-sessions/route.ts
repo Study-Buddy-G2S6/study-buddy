@@ -12,7 +12,7 @@ declare module 'next-auth' {
   }
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const session = await getServerSession(authOptions);
 
@@ -27,10 +27,12 @@ export async function GET() {
       return NextResponse.json({ error: 'Invalid session user id' }, { status: 500 });
     }
 
+    // Check if scope=all is requested
+    const url = new URL(request.url);
+    const scope = url.searchParams.get('scope');
+
     const sessions = await prisma.session.findMany({
-      where: {
-        userId, // your User.id is Int
-      },
+      where: scope === 'all' ? {} : { userId },
       orderBy: { startDate: 'asc' },
       include: { course: true, user: true },
     });

@@ -1,45 +1,22 @@
 'use client';
 
-// import React, { useEffect } from 'react';
-// import { useRouter } from 'next/navigation';
-
-// /**
-//  * Signup has been disabled. Redirect users to the sign-in page.
-//  */
-// const SignUp = () => {
-//   const router = useRouter();
-//   useEffect(() => {
-//     router.push('/auth/signin');
-//   }, [router]);
-
-//   return (
-//     <main>
-//       <div style={{ padding: '4rem', textAlign: 'center' }}>
-//         <h1>Sign Up Disabled</h1>
-//         <p>Account self-registration has been disabled. Please sign in with your university account.</p>
-//         <a href="/auth/signin">Go to Sign In</a>
-//       </div>
-//     </main>
-//   );
-// };
-
-// export default SignUp;
-
 import React, { useEffect, useState } from 'react';
-import { signIn } from 'next-auth/react';
-import { useForm } from 'react-hook-form';
+import { useSession } from 'next-auth/react';
+import { redirect, useRouter } from 'next/navigation';
+import { useForm, SubmitHandler } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
 import { Card, Col, Container, Button, Form, Row } from 'react-bootstrap';
-import { createUser } from '@/lib/dbActions';
+import { getUserWithEnrolledCourses } from '@/lib/dbActions';
+import LoadingSpinner from './LoadingSpinner';
 
 type SignUpForm = {
+  id: number;
   email: string;
-  password: string;
-  confirmPassword: string;
-  // optional fields
-  userName?: string;
+  password?: string;
+  userName: string;
   description?: string;
+  profileImage?: string;
   // We'll read course selections as an array of courseName strings
   // allow undefined entries because yupResolver may infer (string | undefined)[]
   courses?: (string | undefined)[];
@@ -47,21 +24,18 @@ type SignUpForm = {
 };
 
 /** The sign up page. */
-const SignUp = () => {
+const EditProfileForm = ({ userId }: { userId: number }) => {
+  const { data: clientSession, status } = useSession();
+  const router = useRouter();
+  const currentUser = clientSession?.user?.email || '';
+  const effectiveUserId = userId ?? clientSession?.user?.id;
   const validationSchema = Yup.object().shape({
-    email: Yup.string()
-      .required('Email is required')
-      .email('Email is invalid')
-      .matches(/@hawaii.edu$/i, 'Email must be a hawaii.edu address'),
-    password: Yup.string()
-      .required('Password is required')
-      .min(6, 'Password must be at least 6 characters')
-      .max(40, 'Password must not exceed 40 characters'),
-    confirmPassword: Yup.string()
-      .required('Confirm Password is required')
-      .oneOf([Yup.ref('password'), ''], 'Confirm Password does not match'),
-    userName: Yup.string(),
+    id: Yup.number().required(),
+    email: Yup.string().email().required(),
+    password: Yup.string(),
+    userName: Yup.string().required(),
     description: Yup.string(),
+    profileImage: Yup.string(),
     courses: Yup.array().of(Yup.string()),
   });
 
@@ -72,10 +46,20 @@ const SignUp = () => {
     formState: { errors },
   } = useForm<SignUpForm>({
     resolver: yupResolver(validationSchema),
+    defaultValues: {
+      id: effectiveUserId ? Number(effectiveUserId) : 0,
+      email: currentUser,
+      password: '',
+      userName: '',
+      description: '',
+      profileImage: '/default-profile.png',
+      courses: [],
+    },
   });
 
   const [coursesList, setCoursesList] = useState<{ courseName: string; courseTitle: string }[]>([]);
   const [coursesDb, setCoursesDb] = useState<{ id: number; courseName: string; courseTitle: string }[]>([]);
+  const [enrolledCourseNames, setEnrolledCourseNames] = useState<string[]>([]);
   const [showCourses, setShowCourses] = useState(false);
 
   useEffect(() => {
@@ -90,31 +74,69 @@ const SignUp = () => {
       .then((r) => r.json())
       .then((json) => setCoursesDb(json))
       .catch(() => setCoursesDb([]));
-  }, []);
 
-  const onSubmit = async (data: SignUpForm) => {
-    // map the selected course names to objects so the server action can create/connect them
+    // fetch the user's enrolled courses
+    if (effectiveUserId) {
+      getUserWithEnrolledCourses(effectiveUserId).then((userWithCourses) => {
+        if (userWithCourses?.courses) {
+          const enrolled = userWithCourses.courses.map((c) => c.course.courseName);
+          setEnrolledCourseNames(enrolled);
+          // Update form default values with enrolled courses
+          reset((formValues) => ({
+            ...formValues,
+            id: Number(effectiveUserId),
+            email: userWithCourses.email ?? currentUser,
+            userName: userWithCourses.userName ?? formValues.userName,
+            description: userWithCourses.description ?? formValues.description,
+            courses: enrolled,
+          }));
+        }
+      });
+    }
+  }, [effectiveUserId, reset, currentUser]);
+
+  if (status === 'loading') {
+    return <LoadingSpinner />;
+  }
+  if (status === 'unauthenticated') {
+    redirect('/auth/signin');
+  }
+
+  const onSubmit: SubmitHandler<SignUpForm> = async (data) => {
+    const idNum = Number(effectiveUserId ?? data.id);
+
+    // map the selected course names to objects so the server action can edit/connect them
     const selected = data.courses ?? [];
-    // prefer to send objects with `id` when the course exists in the DB so createUser connects
-    const courseObjects = selected.map((name) => {
-      const foundDb = coursesDb.find((c) => c.courseName === name);
-      if (foundDb) return { id: foundDb.id, courseName: foundDb.courseName, courseTitle: foundDb.courseTitle };
-      const found = coursesList.find((c) => c.courseName === name);
-      return { courseName: name, courseTitle: found?.courseTitle ?? name };
+    // prefer to send objects with `id` when the course exists in the DB so editUser connects
+    const courseObjects = selected
+      .filter((name) => name != null)
+      .map((name) => {
+        const foundDb = coursesDb.find((c) => c.courseName === name);
+        if (foundDb) return { id: foundDb.id, courseName: foundDb.courseName, courseTitle: foundDb.courseTitle };
+        const found = coursesList.find((c) => c.courseName === name);
+        return { courseName: name, courseTitle: found?.courseTitle ?? name };
+      });
+
+    const res = await fetch('/api/user/update', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id: idNum,
+        email: data.email,
+        password: data.password,
+        userName: data.userName ?? data.email,
+        description: data.description ?? '',
+        courses: courseObjects,
+        profileImage: '/default-profile.png',
+      }),
     });
 
-    // send the shaped payload to the server action
-    await createUser({
-      email: data.email,
-      password: data.password,
-      userName: data.userName ?? data.email,
-      description: data.description ?? '',
-      courses: courseObjects,
-      profileImage: '/default-profile.png',
-    });
+    if (!res.ok) {
+      console.error('Failed to update user');
+      return;
+    }
 
-    // After creating, signIn with redirect to the add page
-    await signIn('credentials', { callbackUrl: '/user-home', ...data });
+    router.push('/profile');
   };
 
   return (
@@ -122,19 +144,10 @@ const SignUp = () => {
       <Container>
         <Row className="justify-content-center">
           <Col xs={5}>
-            <h1 className="text-center">Sign Up</h1>
+            <h1 className="text-center">Edit Profile</h1>
             <Card>
               <Card.Body>
                 <Form onSubmit={handleSubmit(onSubmit)}>
-                  <Form.Group className="form-group">
-                    <Form.Label>Email</Form.Label>
-                    <input
-                      type="text"
-                      {...register('email')}
-                      className={`form-control ${errors.email ? 'is-invalid' : ''}`}
-                    />
-                    <div className="invalid-feedback">{errors.email?.message}</div>
-                  </Form.Group>
                   <Form.Group className="form-group mt-2">
                     <Form.Label>User Name</Form.Label>
                     <input
@@ -143,25 +156,6 @@ const SignUp = () => {
                       className={`form-control ${errors.userName ? 'is-invalid' : ''}`}
                     />
                     <div className="invalid-feedback">{errors.userName?.message}</div>
-                  </Form.Group>
-
-                  <Form.Group className="form-group mt-2">
-                    <Form.Label>Password</Form.Label>
-                    <input
-                      type="password"
-                      {...register('password')}
-                      className={`form-control ${errors.password ? 'is-invalid' : ''}`}
-                    />
-                    <div className="invalid-feedback">{errors.password?.message}</div>
-                  </Form.Group>
-                  <Form.Group className="form-group mt-2">
-                    <Form.Label>Confirm Password</Form.Label>
-                    <input
-                      type="password"
-                      {...register('confirmPassword')}
-                      className={`form-control ${errors.confirmPassword ? 'is-invalid' : ''}`}
-                    />
-                    <div className="invalid-feedback">{errors.confirmPassword?.message}</div>
                   </Form.Group>
                   <Form.Group className="form-group mt-2">
                     <Form.Label>Description</Form.Label>
@@ -206,6 +200,7 @@ const SignUp = () => {
                                 type="checkbox"
                                 id={`course-${c.courseName}`}
                                 value={c.courseName}
+                                defaultChecked={enrolledCourseNames.includes(c.courseName)}
                                 {...register('courses')}
                               />
                               <label
@@ -221,11 +216,15 @@ const SignUp = () => {
                     )}
                     <div className="invalid-feedback">{errors.courses?.message}</div>
                   </Form.Group>
+
+                  <input type="hidden" {...register('email')} value={currentUser} />
+                  <input type="hidden" {...register('id')} value={Number(effectiveUserId)} />
+
                   <Form.Group className="form-group py-3">
                     <Row>
                       <Col>
                         <Button type="submit" className="btn btn-primary">
-                          Register
+                          Update
                         </Button>
                       </Col>
                       <Col>
@@ -237,10 +236,6 @@ const SignUp = () => {
                   </Form.Group>
                 </Form>
               </Card.Body>
-              <Card.Footer>
-                Already have an account?
-                <a href="/auth/signin">Sign in</a>
-              </Card.Footer>
             </Card>
           </Col>
         </Row>
@@ -249,4 +244,4 @@ const SignUp = () => {
   );
 };
 
-export default SignUp;
+export default EditProfileForm;

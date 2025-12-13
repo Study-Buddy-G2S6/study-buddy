@@ -92,7 +92,7 @@ export async function createSession(session: {
       owner: session.owner,
     },
   });
-  redirect('/calendar');
+  redirect('/calendar/all-sessions');
 }
 
 export async function editSession(session: Session) {
@@ -109,7 +109,7 @@ export async function editSession(session: Session) {
       owner: session.owner,
     },
   });
-  redirect('/calendar');
+  redirect('/session/my-sessions');
 }
 
 export async function deleteSession(id: number) {
@@ -136,32 +136,17 @@ export async function createUser(credentials: {
   // console.log(`createUser data: ${JSON.stringify(credentials, null, 2)}`);
   const password = await hash(credentials.password, 10);
 
-  const providedCourses = credentials.courses ?? [];
+  const courses = credentials.courses ?? [];
 
-  // Determine how to attach courses using the join model `CourseToUser`.
-  // Build a nested `courseToUsers` payload for prisma.user.create.
-  let courseToUsersPayload: any;
-  if (providedCourses.length > 0) {
-    const first = providedCourses[0] as any;
-    if (typeof first === 'object' && first !== null && 'id' in first && first.id) {
-      // connect existing course records by id via CourseToUser entries
-      courseToUsersPayload = {
-        create: (providedCourses as any[]).map((c) => ({ course: { connect: { id: c.id } } })),
-      };
-    } else if (typeof first === 'string') {
-      // array of courseName strings -> create Course records and CourseToUser entries
-      courseToUsersPayload = {
-        create: (providedCourses as string[]).map((name) => ({
-          course: { create: { courseName: name, courseTitle: name } } })),
-      };
-    } else {
-      // array of objects with courseName/courseTitle -> create Course and CourseToUser entries
-      courseToUsersPayload = {
-        create: (providedCourses as any[]).map((c) => ({
-          course: { create: { courseName: c.courseName, courseTitle: c.courseTitle ?? c.courseName } } })),
-      };
+  const getCoursePayload = (c: any) => {
+    if (typeof c === 'string') {
+      return { create: { courseName: c, courseTitle: c } };
     }
-  }
+    if ('id' in c && c.id) {
+      return { connect: { id: c.id } };
+    }
+    return { create: { courseName: c.courseName, courseTitle: c.courseTitle ?? c.courseName } };
+  };
 
   await prisma.user.create({
     data: {
@@ -170,7 +155,61 @@ export async function createUser(credentials: {
       userName: credentials.userName ?? credentials.email,
       description: credentials.description,
       profileImage: credentials.profileImage,
-      ...(courseToUsersPayload ? { courseToUsers: courseToUsersPayload } : {}),
+      ...(courses.length > 0 && {
+        courses: {
+          create: (courses as any[]).map((c) => ({
+            course: getCoursePayload(c),
+          })),
+        },
+      }),
+    },
+  });
+}
+
+/**
+ * Edits an existing user in the database.
+ * @param credentials,
+ * an object with the following properties: id, email, userName, description, profileImage, and optional courses.
+ */
+export async function editUser(credentials: {
+  id: number;
+  email: string;
+  password: string;
+  userName: string;
+  description: string;
+  profileImage: string;
+  // Accept a flexible courses payload: existing Course objects (with id),
+  // an array of courseName strings, or objects with courseName/courseTitle.
+  courses?: Array<{ id?: number; courseName?: string; courseTitle?: string } | string>;
+}) {
+  // console.log(`editUser data: ${JSON.stringify(credentials, null, 2)}`);
+
+  const courses = credentials.courses ?? [];
+
+  const getCoursePayload = (c: any) => {
+    if (typeof c === 'string') {
+      return { create: { courseName: c, courseTitle: c } };
+    }
+    if ('id' in c && c.id) {
+      return { connect: { id: c.id } };
+    }
+    return { create: { courseName: c.courseName, courseTitle: c.courseTitle ?? c.courseName } };
+  };
+
+  await prisma.user.update({
+    where: { id: credentials.id },
+    data: {
+      email: credentials.email,
+      userName: credentials.userName,
+      description: credentials.description,
+      ...(courses.length > 0 && {
+        courses: {
+          deleteMany: {},
+          create: (courses as any[]).map((c) => ({
+            course: getCoursePayload(c),
+          })),
+        },
+      }),
     },
   });
 }
@@ -208,4 +247,34 @@ export async function getCourseAndUserById(courseId: number, userId: number) {
     prisma.user.findUnique({ where: { id: userId } }),
   ]);
   return { course, user };
+}
+
+// // find one
+// await prisma.courseToUser.findUnique({
+//   where: { userId_courseId: { userId, courseId } },
+//   include: { course: true, user: true },
+// });
+
+// // insert or ensure exists
+// await prisma.courseToUser.upsert({
+//   where: { userId_courseId: { userId, courseId } },
+//   create: { userId, courseId },
+//   update: {}, // no-op for pure connect
+// });
+
+// // delete the link
+// await prisma.courseToUser.delete({
+//   where: { userId_courseId: { userId, courseId } },
+// });
+
+export async function getUserWithEnrolledCourses(userId: number | string) {
+  const id = typeof userId === 'string' ? parseInt(userId, 10) : userId;
+  return prisma.user.findUnique({
+    where: { id },
+    include: {
+      courses: {
+        include: { course: true },
+      },
+    },
+  });
 }

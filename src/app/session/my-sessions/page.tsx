@@ -1,10 +1,9 @@
 import { getServerSession } from 'next-auth';
-import { Col, Container, Row } from 'react-bootstrap';
+import { Col, Container, Row, Button } from 'react-bootstrap';
 import { prisma } from '@/lib/prisma';
 import { loggedInProtectedPage } from '@/lib/page-protection';
 import authOptions from '@/lib/authOptions';
-import { User, Course } from '@prisma/client';
-import SessionCard from '@/components/SessionCard';
+import MySessionsListClient from '@/components/MySessionsListClient';
 
 /** Render a list of items for the logged in user. */
 const ListPage = async () => {
@@ -35,6 +34,7 @@ const ListPage = async () => {
   });
 
   console.log('sessions', sessions);
+  const hasSessions = sessions.length > 0;
 
   return (
     <main>
@@ -42,20 +42,28 @@ const ListPage = async () => {
         <Row>
           <Col>
             <h1 className="text-center">
-              {user?.userName ? `${user.userName}'s Sessions` : 'My Sessions'}
+              {user?.userName || 'My'}
+              &apos;s Sessions
             </h1>
-            <Row xs={1} md={2} lg={3} className="g-4">
-              {sessions.map((session) => (
-                <Col key={session.id}>
-                  <SessionCard
-                    session={session}
-                    user={session.user as User}
-                    course={session.course as Course}
-                    showActions={true}
-                  />
+            {hasSessions ? (
+              <>
+                <Row>
+                  <Button href="/calendar" className="mb-3 d-inline-block" variant="link">
+                    View My Sessions on the Calendar
+                  </Button>
+                </Row>
+                <MySessionsListClient sessions={sessions as any} />
+              </>
+            ) : (
+              <Row className="text-center mt-4">
+                <Col>
+                  <p className="text-muted mb-3">You currently have no sessions. Would you like to create a session?</p>
+                  <Button href="/session/add" variant="primary">
+                    Create a Session
+                  </Button>
                 </Col>
-              ))}
-            </Row>
+              </Row>
+            )}
           </Col>
         </Row>
       </Container>

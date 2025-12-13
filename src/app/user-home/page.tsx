@@ -27,21 +27,21 @@ export default async function UserHome() {
       <Container className="my-5">
         <div className="row g-4 justify-content-center">
           <div className="col-md-6 col-lg-5">
-            <Link href="/sessions" className="text-decoration-none">
+            <Link href="/session/all-sessions" className="text-decoration-none">
               <Button variant="primary" size="lg" className="w-100 py-5 shadow">
                 <strong className="fs-4">Find Study Sessions</strong>
               </Button>
             </Link>
           </div>
           <div className="col-md-6 col-lg-5">
-            <Link href="/sessions/create" className="text-decoration-none">
+            <Link href="/session/add" className="text-decoration-none">
               <Button variant="success" size="lg" className="w-100 py-5 shadow">
                 <strong className="fs-4">Create New Session</strong>
               </Button>
             </Link>
           </div>
           <div className="col-md-6 col-lg-5">
-            <Link href="/sessions/my" className="text-decoration-none">
+            <Link href="/session/my-sessions" className="text-decoration-none">
               <Button variant="warning" size="lg" className="w-100 py-5 shadow text-dark">
                 <strong className="fs-4">My Sessions</strong>
               </Button>
