@@ -4,6 +4,9 @@ import { getServerSession, DefaultSession } from 'next-auth';
 import authOptions from '@/lib/authOptions';
 import { prisma } from '@/lib/prisma';
 
+// Force dynamic to ensure this route runs on the server in Vercel
+export const dynamic = 'force-dynamic';
+
 declare module 'next-auth' {
   interface Session {
     user: {
@@ -67,17 +70,30 @@ export async function POST(request: Request) {
   }
 
   try {
-    const newSession = await prisma.session.create({
-      data: {
-        name: title.trim(),
-        courseId: Number(course.id),
-        location: location || null,
-        description: description || null,
-        startDate: new Date(startDate),
-        endDate: new Date(endDate),
-        userId,
-        owner: session.user.email!,
-      },
+    const newSession = await prisma.$transaction(async (tx) => {
+      const created = await tx.session.create({
+        data: {
+          name: title.trim(),
+          courseId: Number(course.id),
+          location: location || null,
+          description: description || null,
+          startDate: new Date(startDate),
+          endDate: new Date(endDate),
+          userId,
+          owner: session.user.email!,
+        },
+      });
+
+      await tx.user.update({
+        where: { id: userId },
+        data: {
+          points: {
+            increment: 1,
+          },
+        },
+      });
+
+      return created;
     });
 
     return NextResponse.json({ success: true, session: newSession });

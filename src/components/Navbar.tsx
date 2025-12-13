@@ -15,6 +15,7 @@ import {
   Calendar3Event,
   PeopleFill,
   PersonFill,
+  Trophy,
 } from 'react-bootstrap-icons';
 
 const NavBar: React.FC = () => {
@@ -69,6 +70,10 @@ const NavBar: React.FC = () => {
                 <Nav.Link as={Link} href="/calendar/all-sessions" active={pathname === '/calendar/all-sessions'}>
                   <Calendar3Event className="me-1" />
                   <span>Calendar</span>
+                </Nav.Link>
+                <Nav.Link as={Link} href="/leaderboard" active={pathname === '/leaderboard'}>
+                  <Trophy className="me-1" />
+                  <span>Leaderboard</span>
                 </Nav.Link>
                 {isAdmin && (
                   <Nav.Link
