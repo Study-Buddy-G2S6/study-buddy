@@ -20,8 +20,15 @@ export const CreateSessionSchema = Yup.object({
   courseId: Yup.number().required(),
   location: Yup.string().required(),
   description: Yup.string().optional(),
-  startDate: Yup.date().required(),
-  endDate: Yup.date().required(),
+  sessionDate: Yup.string().required('Date is required'),
+  startTime: Yup.string().required('Start time is required'),
+  endTime: Yup.string()
+    .required('End time is required')
+    .test('is-after-start', 'End time must be after start time', function(value) {
+      const { startTime } = this.parent;
+      if (!value || !startTime) return true;
+      return value > startTime;
+    }),
   userId: Yup.number().required(),
   owner: Yup.string().required(),
   createdAt: Yup.date().required(),
@@ -34,8 +41,15 @@ export const EditSessionSchema = Yup.object({
   courseId: Yup.number().required(),
   location: Yup.string().required(),
   description: Yup.string().optional(),
-  startDate: Yup.date().required(),
-  endDate: Yup.date().required(),
+  sessionDate: Yup.string().required('Date is required'),
+  startTime: Yup.string().required('Start time is required'),
+  endTime: Yup.string()
+    .required('End time is required')
+    .test('is-after-start', 'End time must be after start time', function(value) {
+      const { startTime } = this.parent;
+      if (!value || !startTime) return true;
+      return value > startTime;
+    }),
   userId: Yup.number().required(),
   owner: Yup.string().required(),
   createdAt: Yup.date().required(),

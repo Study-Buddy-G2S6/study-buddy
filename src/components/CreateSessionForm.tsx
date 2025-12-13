@@ -16,15 +16,33 @@ const onSubmit = async (data: {
   courseId: number;
   location: string;
   description?: string;
-  startDate: Date;
-  endDate: Date;
+  sessionDate: string;
+  startTime: string;
+  endTime: string;
   userId: number;
   owner: string;
   createdAt: Date;
   updatedAt: Date;
 }) => {
-  // console.log(`onSubmit data: ${JSON.stringify(data, null, 2)}`);
-  await createSession(data);
+  // Combine date and times into full Date objects
+  const startDate = new Date(`${data.sessionDate}T${data.startTime}`);
+  const endDate = new Date(`${data.sessionDate}T${data.endTime}`);
+  
+  const sessionData = {
+    name: data.name,
+    courseId: data.courseId,
+    location: data.location,
+    description: data.description,
+    startDate,
+    endDate,
+    userId: data.userId,
+    owner: data.owner,
+    createdAt: data.createdAt,
+    updatedAt: data.updatedAt,
+  };
+  
+  // console.log(`onSubmit data: ${JSON.stringify(sessionData, null, 2)}`);
+  await createSession(sessionData);
   swal('Success', 'Your session has been created', 'success', {
     timer: 2000,
   });
@@ -150,27 +168,44 @@ const CreateSessionForm = () => {
               )}
             </Form.Group>
 
-            <Form.Group className="mb-4">
-              <Form.Label className="fw-semibold">Start Date/Time</Form.Label>
-              <Form.Control
-                required
-                type="datetime-local"
-                {...register('startDate')}
-                className={`form-control ${errors.startDate ? 'is-invalid' : ''}`}
-              />
-              <div className="invalid-feedback">{errors.startDate?.message}</div>
-            </Form.Group>
-
-            <Form.Group className="mb-4">
-              <Form.Label className="fw-semibold">End Date/Time</Form.Label>
-              <Form.Control
-                required
-                type="datetime-local"
-                {...register('endDate')}
-                className={`form-control ${errors.endDate ? 'is-invalid' : ''}`}
-              />
-              <div className="invalid-feedback">{errors.endDate?.message}</div>
-            </Form.Group>
+            <Row className="mb-4">
+              <Col md={4}>
+                <Form.Group>
+                  <Form.Label className="fw-semibold">Date</Form.Label>
+                  <Form.Control
+                    required
+                    type="date"
+                    {...register('sessionDate')}
+                    className={`form-control ${errors.sessionDate ? 'is-invalid' : ''}`}
+                  />
+                  <div className="invalid-feedback">{errors.sessionDate?.message}</div>
+                </Form.Group>
+              </Col>
+              <Col md={4}>
+                <Form.Group>
+                  <Form.Label className="fw-semibold">Start Time</Form.Label>
+                  <Form.Control
+                    required
+                    type="time"
+                    {...register('startTime')}
+                    className={`form-control ${errors.startTime ? 'is-invalid' : ''}`}
+                  />
+                  <div className="invalid-feedback">{errors.startTime?.message}</div>
+                </Form.Group>
+              </Col>
+              <Col md={4}>
+                <Form.Group>
+                  <Form.Label className="fw-semibold">End Time</Form.Label>
+                  <Form.Control
+                    required
+                    type="time"
+                    {...register('endTime')}
+                    className={`form-control ${errors.endTime ? 'is-invalid' : ''}`}
+                  />
+                  <div className="invalid-feedback">{errors.endTime?.message}</div>
+                </Form.Group>
+              </Col>
+            </Row>
 
             <Form.Group className="mb-4">
               <Form.Label className="fw-semibold">Location</Form.Label>
