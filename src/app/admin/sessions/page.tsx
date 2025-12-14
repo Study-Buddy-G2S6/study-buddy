@@ -11,6 +11,7 @@ export const dynamic = 'force-dynamic';
 
 async function deleteSession(formData: FormData) {
   'use server';
+
   const sessionId = Number(formData.get('sessionId'));
 
   const existing = await prisma.session.findUnique({
@@ -41,9 +42,9 @@ async function deleteSession(formData: FormData) {
 }
 
 export default async function AdminSessionsPage() {
-  const session = await getServerSession(authOptions);
+  const serverSession = await getServerSession(authOptions);
 
-  if (!session?.user || (session.user as any).role !== 'ADMIN') {
+  if (!serverSession?.user || (serverSession.user as any).role !== 'ADMIN') {
     return (
       <Container className="py-5 text-center">
         <h1>Access Denied</h1>

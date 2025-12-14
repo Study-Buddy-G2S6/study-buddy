@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button, Form, Card, Row, Col } from 'react-bootstrap';
 import { redirect } from 'next/navigation';
 import { useSession } from 'next-auth/react';
@@ -55,7 +55,7 @@ const onSubmit = async (
   });
 };
 
-const CreateSessionForm = ({ overrideUserId }: CreateSessionFormProps = {}) => {
+const CreateSessionForm: React.FC<CreateSessionFormProps> = ({ overrideUserId }) => {
   const { data: session, status } = useSession();
   const currentUser = session?.user?.email || '';
   const [coursesList, setCoursesList] = useState<{ courseName: string; courseTitle: string }[]>([]);
@@ -267,6 +267,11 @@ const CreateSessionForm = ({ overrideUserId }: CreateSessionFormProps = {}) => {
       </Card>
     </div>
   );
+};
+
+// Provide defaultProps for optional props to satisfy eslint react/require-default-props
+CreateSessionForm.defaultProps = {
+  overrideUserId: undefined,
 };
 
 export default CreateSessionForm;

@@ -11,6 +11,7 @@ export const runtime = 'nodejs';
 
 async function deleteUser(formData: FormData) {
   'use server';
+
   const userId = Number(formData.get('userId'));
   await prisma.user.delete({ where: { id: userId } });
   revalidatePath('/admin');
@@ -69,20 +70,7 @@ const AdminPage = async () => {
                     <td>
                       <form action={deleteUser} style={{ display: 'inline' }}>
                         <input type="hidden" name="userId" value={user.id} />
-                        <Button
-                          variant="danger"
-                          size="sm"
-                          type="submit"
-                          onClick={(e) => {
-                            if (
-                              !confirm(
-                                'Are you sure you want to delete this user? This will permanently remove them and all their data.',
-                              )
-                            ) {
-                              e.preventDefault();
-                            }
-                          }}
-                        >
+                        <Button variant="danger" size="sm" type="submit">
                           Delete
                         </Button>
                       </form>

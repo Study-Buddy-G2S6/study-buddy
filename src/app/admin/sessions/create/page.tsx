@@ -1,8 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
-import { prisma } from '@/lib/prisma';
 import CreateSessionForm from '@/components/CreateSessionForm';
 import { Container, Form, Alert, Button } from 'react-bootstrap';
 import Link from 'next/link';
@@ -10,6 +9,20 @@ import Link from 'next/link';
 export default function AdminCreateSessionPage() {
   const { data: session, status } = useSession();
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
+
+  // Fetch users client-side (simple and works)
+  const [users, setUsers] = useState<{ id: number; email: string }[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/admin/users') // We'll create this tiny API in a second
+      .then((res) => res.json())
+      .then((data) => {
+        setUsers(data);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, []);
 
   if (status === 'loading') return <p>Loading...</p>;
 
@@ -22,20 +35,6 @@ export default function AdminCreateSessionPage() {
       </Container>
     );
   }
-
-  // Fetch users client-side (simple and works)
-  const [users, setUsers] = useState<{ id: number; email: string }[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useState(() => {
-    fetch('/api/admin/users') // We'll create this tiny API in a second
-      .then((res) => res.json())
-      .then((data) => {
-        setUsers(data);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
-  });
 
   if (loading) return <p>Loading users...</p>;
 
@@ -53,7 +52,8 @@ export default function AdminCreateSessionPage() {
           <option value="">-- Choose a user --</option>
           {users.map((user) => (
             <option key={user.id} value={user.id}>
-              {user.email} {session.user?.email === user.email ? '(You)' : ''}
+              {user.email}
+              {session.user?.email === user.email ? ' (You)' : ''}
             </option>
           ))}
         </Form.Select>
