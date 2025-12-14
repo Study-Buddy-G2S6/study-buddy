@@ -8,8 +8,11 @@ import { Button, Container } from 'react-bootstrap';
 
 export default async function AdminDashboard() {
   const session = await getServerSession(authOptions);
-  const user = session?.user as { email?: string; name?: string; role?: string } | null;
-  if (!session?.user || user?.role !== 'ADMIN') redirect('/not-authorized');
+
+  // Correct check: uses the actual 'role' property added by NextAuth
+  if (!session?.user || (session.user as any).role !== 'ADMIN') {
+    redirect('/not-authorized');
+  }
 
   return (
     <>

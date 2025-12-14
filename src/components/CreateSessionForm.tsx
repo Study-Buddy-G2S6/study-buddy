@@ -11,19 +11,26 @@ import { createSession } from '@/lib/dbActions';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { CreateSessionSchema } from '@/lib/validationSchemas';
 
-const onSubmit = async (data: {
-  name: string;
-  courseId: number;
-  location: string;
-  description?: string;
-  sessionDate: string;
-  startTime: string;
-  endTime: string;
-  userId: number;
-  owner: string;
-  createdAt: Date;
-  updatedAt: Date;
-}) => {
+type CreateSessionFormProps = {
+  overrideUserId?: number; // NEW: Admin can force a different userId
+};
+
+const onSubmit = async (
+  data: {
+    name: string;
+    courseId: number;
+    location: string;
+    description?: string;
+    sessionDate: string;
+    startTime: string;
+    endTime: string;
+    userId: number;
+    owner: string;
+    createdAt: Date;
+    updatedAt: Date;
+  },
+  overrideUserId?: number, // NEW: Accept override
+) => {
   // Combine date and times into full Date objects
   const startDate = new Date(`${data.sessionDate}T${data.startTime}`);
   const endDate = new Date(`${data.sessionDate}T${data.endTime}`);
@@ -35,23 +42,23 @@ const onSubmit = async (data: {
     description: data.description,
     startDate,
     endDate,
-    userId: data.userId,
+    // NEW: Use override if provided, else fall back to form userId
+    userId: overrideUserId ?? data.userId,
     owner: data.owner,
     createdAt: data.createdAt,
     updatedAt: data.updatedAt,
   };
 
-  // console.log(`onSubmit data: ${JSON.stringify(sessionData, null, 2)}`);
   await createSession(sessionData);
   swal('Success', 'Your session has been created', 'success', {
     timer: 2000,
   });
 };
 
-const CreateSessionForm = () => {
+const CreateSessionForm = ({ overrideUserId }: CreateSessionFormProps = {}) => {
   const { data: session, status } = useSession();
   const currentUser = session?.user?.email || '';
-  const [coursesList, setCoursesList] = useState<{ courseName: string; courseTitle: string; }[]>([]);
+  const [coursesList, setCoursesList] = useState<{ courseName: string; courseTitle: string }[]>([]);
   const [userId, setUserId] = useState<number | null>(null);
   const [userIdError, setUserIdError] = useState<string | null>(null);
 
@@ -66,7 +73,6 @@ const CreateSessionForm = () => {
   });
 
   useEffect(() => {
-    // fetch the default courses from the new api route
     fetch('/api/default-courses')
       .then((r) => r.json())
       .then((json) => setCoursesList(json))
@@ -74,8 +80,8 @@ const CreateSessionForm = () => {
   }, []);
 
   useEffect(() => {
-    // Fetch the current user's ID from the database
-    if (currentUser) {
+    if (currentUser && !overrideUserId) {
+      // Only fetch if not overridden by admin
       fetch(`/api/user-courses?email=${encodeURIComponent(currentUser)}`)
         .then((r) => r.json())
         .then((data) => {
@@ -92,7 +98,16 @@ const CreateSessionForm = () => {
           setUserIdError('Unable to load your user ID. Please try again or re-login.');
         });
     }
-  }, [currentUser, setValue]);
+  }, [currentUser, setValue, overrideUserId]);
+
+  // If admin override, we don't need to fetch userId — we'll use overrideUserId in onSubmit
+  useEffect(() => {
+    if (overrideUserId) {
+      setUserId(overrideUserId);
+      setValue('userId', overrideUserId, { shouldValidate: true });
+    }
+  }, [overrideUserId, setValue]);
+
   if (status === 'loading') {
     return <LoadingSpinner />;
   }
@@ -102,12 +117,12 @@ const CreateSessionForm = () => {
 
   return (
     <div className="container py-5">
-      {/* This matches your navbar link exactly */}
       <h1 className="text-dark mb-5 fw-bold display-5">Create Session</h1>
 
       <Card className="shadow-lg border-0">
         <Card.Body className="p-5">
-          <Form onSubmit={handleSubmit(onSubmit)}>
+          <Form onSubmit={handleSubmit((data) => onSubmit(data, overrideUserId))}>
+            {/* Rest of your form — unchanged */}
             <Form.Group className="mb-4">
               <Form.Label className="fw-semibold">Name</Form.Label>
               <input
@@ -131,7 +146,6 @@ const CreateSessionForm = () => {
                     aria-label="Select course"
                     onChange={async (e) => {
                       const selectedName = e.target.value;
-                      // clear numeric id when no selection
                       if (!selectedName) {
                         setValue('courseId', undefined as any, { shouldValidate: true });
                         return;
@@ -140,10 +154,8 @@ const CreateSessionForm = () => {
                         const res = await fetch(`/api/courses/lookup?name=${encodeURIComponent(selectedName)}`);
                         if (res.ok) {
                           const json = await res.json();
-                          // set the numeric courseId for submission/validation
                           setValue('courseId', Number(json.id), { shouldValidate: true });
                         } else {
-                          // lookup failed: clear the id
                           setValue('courseId', undefined as any, { shouldValidate: true });
                         }
                       } catch (err) {
@@ -161,7 +173,6 @@ const CreateSessionForm = () => {
                     ))}
                   </Form.Select>
 
-                  {/* hidden numeric field that will be set from the lookup API */}
                   <input type="hidden" {...register('courseId', { valueAsNumber: true })} />
                   <div className="invalid-feedback">{errors.courseId?.message}</div>
                 </>
@@ -235,9 +246,7 @@ const CreateSessionForm = () => {
             <input type="hidden" {...register('createdAt')} value={new Date().toISOString()} />
             <input type="hidden" {...register('updatedAt')} value={new Date().toISOString()} />
 
-            {userIdError && (
-              <div className="text-danger mb-3">{userIdError}</div>
-            )}
+            {userIdError && <div className="text-danger mb-3">{userIdError}</div>}
 
             <Form.Group className="form-group">
               <Row className="pt-3 justify-content-center">
@@ -253,7 +262,6 @@ const CreateSessionForm = () => {
                 </Col>
               </Row>
             </Form.Group>
-
           </Form>
         </Card.Body>
       </Card>
