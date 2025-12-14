@@ -12,9 +12,32 @@ import LoadingSpinner from '@/components/LoadingSpinner';
 import { EditSessionSchema } from '@/lib/validationSchemas';
 import { Session } from '@prisma/client';
 
-const onSubmit = async (data: Omit<Session, 'description'> & { description?: string }) => {
-  // console.log(`onSubmit data: ${JSON.stringify(data, null, 2)}`);
-  await editSession(data as Session);
+const onSubmit = async (data: Omit<Session, 'description' | 'startDate' | 'endDate'> & { 
+  description?: string;
+  sessionDate: string;
+  startTime: string;
+  endTime: string;
+}) => {
+  // Combine date and times into full Date objects
+  const startDate = new Date(`${data.sessionDate}T${data.startTime}`);
+  const endDate = new Date(`${data.sessionDate}T${data.endTime}`);
+  
+  const sessionData = {
+    id: data.id,
+    name: data.name,
+    courseId: data.courseId,
+    location: data.location,
+    description: data.description,
+    startDate,
+    endDate,
+    userId: data.userId,
+    owner: data.owner,
+    createdAt: data.createdAt,
+    updatedAt: data.updatedAt,
+  };
+  
+  // console.log(`onSubmit data: ${JSON.stringify(sessionData, null, 2)}`);
+  await editSession(sessionData as Session);
   swal('Success', 'Your session has been updated', 'success', {
     timer: 2000,
   });
@@ -139,45 +162,63 @@ const EditSessionForm = ({ session }: { session: Session }) => {
               )}
             </Form.Group>
 
-            <Form.Group className="mb-4">
-              <Form.Label className="fw-semibold">Start Date/Time</Form.Label>
-              <Form.Control
-                required
-                type="datetime-local"
-                {...register('startDate')}
-                defaultValue={(() => {
-                  const date = new Date(session.startDate);
-                  const year = date.getFullYear();
-                  const month = String(date.getMonth() + 1).padStart(2, '0');
-                  const day = String(date.getDate()).padStart(2, '0');
-                  const hours = String(date.getHours()).padStart(2, '0');
-                  const minutes = String(date.getMinutes()).padStart(2, '0');
-                  return `${year}-${month}-${day}T${hours}:${minutes}`;
-                })()}
-                className={`form-control ${errors.startDate ? 'is-invalid' : ''}`}
-              />
-              <div className="invalid-feedback">{errors.startDate?.message}</div>
-            </Form.Group>
-
-            <Form.Group className="mb-4">
-              <Form.Label className="fw-semibold">End Date/Time</Form.Label>
-              <Form.Control
-                required
-                type="datetime-local"
-                {...register('endDate')}
-                defaultValue={(() => {
-                  const date = new Date(session.endDate);
-                  const year = date.getFullYear();
-                  const month = String(date.getMonth() + 1).padStart(2, '0');
-                  const day = String(date.getDate()).padStart(2, '0');
-                  const hours = String(date.getHours()).padStart(2, '0');
-                  const minutes = String(date.getMinutes()).padStart(2, '0');
-                  return `${year}-${month}-${day}T${hours}:${minutes}`;
-                })()}
-                className={`form-control ${errors.endDate ? 'is-invalid' : ''}`}
-              />
-              <div className="invalid-feedback">{errors.endDate?.message}</div>
-            </Form.Group>
+            <Row className="mb-4">
+              <Col md={4}>
+                <Form.Group>
+                  <Form.Label className="fw-semibold">Date</Form.Label>
+                  <Form.Control
+                    required
+                    type="date"
+                    {...register('sessionDate')}
+                    defaultValue={(() => {
+                      const date = new Date(session.startDate);
+                      const year = date.getFullYear();
+                      const month = String(date.getMonth() + 1).padStart(2, '0');
+                      const day = String(date.getDate()).padStart(2, '0');
+                      return `${year}-${month}-${day}`;
+                    })()}
+                    className={`form-control ${errors.sessionDate ? 'is-invalid' : ''}`}
+                  />
+                  <div className="invalid-feedback">{errors.sessionDate?.message}</div>
+                </Form.Group>
+              </Col>
+              <Col md={4}>
+                <Form.Group>
+                  <Form.Label className="fw-semibold">Start Time</Form.Label>
+                  <Form.Control
+                    required
+                    type="time"
+                    {...register('startTime')}
+                    defaultValue={(() => {
+                      const date = new Date(session.startDate);
+                      const hours = String(date.getHours()).padStart(2, '0');
+                      const minutes = String(date.getMinutes()).padStart(2, '0');
+                      return `${hours}:${minutes}`;
+                    })()}
+                    className={`form-control ${errors.startTime ? 'is-invalid' : ''}`}
+                  />
+                  <div className="invalid-feedback">{errors.startTime?.message}</div>
+                </Form.Group>
+              </Col>
+              <Col md={4}>
+                <Form.Group>
+                  <Form.Label className="fw-semibold">End Time</Form.Label>
+                  <Form.Control
+                    required
+                    type="time"
+                    {...register('endTime')}
+                    defaultValue={(() => {
+                      const date = new Date(session.endDate);
+                      const hours = String(date.getHours()).padStart(2, '0');
+                      const minutes = String(date.getMinutes()).padStart(2, '0');
+                      return `${hours}:${minutes}`;
+                    })()}
+                    className={`form-control ${errors.endTime ? 'is-invalid' : ''}`}
+                  />
+                  <div className="invalid-feedback">{errors.endTime?.message}</div>
+                </Form.Group>
+              </Col>
+            </Row>
 
             <Form.Group className="mb-4">
               <Form.Label className="fw-semibold">Location</Form.Label>

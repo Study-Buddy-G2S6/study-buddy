@@ -6,6 +6,8 @@ import { Button, Container } from 'react-bootstrap';
 import Profile from '@/components/Profile';
 import { prisma } from '@/lib/prisma';
 
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 const UserProfile = async () => {
   // Protect the page, only logged in users can access it.
   const session = await getServerSession(authOptions);

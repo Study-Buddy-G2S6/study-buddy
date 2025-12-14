@@ -4,6 +4,8 @@ import { loggedInProtectedPage } from '@/lib/page-protection';
 import authOptions from '@/lib/authOptions';
 import SessionsList from '@/components/SessionsList';
 
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 /** Render a list of all study sessions. */
 const StudySessionsPage = async () => {
   // Protect the page, only logged in users can access it.

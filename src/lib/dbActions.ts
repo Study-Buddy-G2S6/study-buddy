@@ -80,17 +80,28 @@ export async function createSession(session: {
   createdAt: Date;
   updatedAt: Date;
 }) {
-  await prisma.session.create({
-    data: {
-      name: session.name,
-      userId: session.userId,
-      courseId: session.courseId,
-      location: session.location,
-      description: session.description || '',
-      startDate: session.startDate,
-      endDate: session.endDate,
-      owner: session.owner,
-    },
+  await prisma.$transaction(async (tx) => {
+    await tx.session.create({
+      data: {
+        name: session.name,
+        userId: session.userId,
+        courseId: session.courseId,
+        location: session.location,
+        description: session.description || '',
+        startDate: session.startDate,
+        endDate: session.endDate,
+        owner: session.owner,
+      },
+    });
+
+    await tx.user.update({
+      where: { id: session.userId },
+      data: {
+        points: {
+          increment: 1,
+        },
+      },
+    });
   });
   redirect('/calendar/all-sessions');
 }
@@ -113,8 +124,36 @@ export async function editSession(session: Session) {
 }
 
 export async function deleteSession(id: number) {
-  await prisma.session.delete({
+  const existing = await prisma.session.findUnique({
     where: { id },
+    select: { userId: true },
+  });
+
+  if (!existing) {
+    redirect('/session/my-sessions');
+  }
+
+  await prisma.$transaction(async (tx) => {
+    await tx.session.delete({
+      where: { id },
+    });
+
+    const updatedUser = await tx.user.update({
+      where: { id: existing!.userId },
+      data: {
+        points: {
+          decrement: 1,
+        },
+      },
+      select: { points: true },
+    });
+
+    if (updatedUser.points < 0) {
+      await tx.user.update({
+        where: { id: existing!.userId },
+        data: { points: 0 },
+      });
+    }
   });
   redirect('/session/my-sessions');
 }
