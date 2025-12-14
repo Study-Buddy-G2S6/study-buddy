@@ -30,7 +30,7 @@ import { signIn } from 'next-auth/react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
-import { Card, Col, Container, Button, Form, Row } from 'react-bootstrap';
+import { Card, Col, Container, Button, Form, Row, Image } from 'react-bootstrap';
 import { createUser } from '@/lib/dbActions';
 
 type SignUpForm = {
@@ -40,6 +40,7 @@ type SignUpForm = {
   // optional fields
   userName?: string;
   description?: string;
+  profileImage?: FileList;
   // We'll read course selections as an array of courseName strings
   // allow undefined entries because yupResolver may infer (string | undefined)[]
   courses?: (string | undefined)[];
@@ -77,6 +78,7 @@ const SignUp = () => {
   const [coursesList, setCoursesList] = useState<{ courseName: string; courseTitle: string }[]>([]);
   const [coursesDb, setCoursesDb] = useState<{ id: number; courseName: string; courseTitle: string }[]>([]);
   const [showCourses, setShowCourses] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string>('/default-profile.png');
 
   useEffect(() => {
     // fetch the default courses from the new api route
@@ -103,6 +105,17 @@ const SignUp = () => {
       return { courseName: name, courseTitle: found?.courseTitle ?? name };
     });
 
+    // Convert image to base64 if provided
+    let profileImageBase64 = '/default-profile.png';
+    if (data.profileImage && data.profileImage.length > 0) {
+      const file = data.profileImage[0];
+      profileImageBase64 = await new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.readAsDataURL(file);
+      });
+    }
+
     // send the shaped payload to the server action
     await createUser({
       email: data.email,
@@ -110,7 +123,7 @@ const SignUp = () => {
       userName: data.userName ?? data.email,
       description: data.description ?? '',
       courses: courseObjects,
-      profileImage: '/default-profile.png',
+      profileImage: profileImageBase64,
     });
 
     // After creating, signIn with redirect to the add page
@@ -170,6 +183,40 @@ const SignUp = () => {
                       className={`form-control ${errors.description ? 'is-invalid' : ''}`}
                     />
                     <div className="invalid-feedback">{errors.description?.message}</div>
+                  </Form.Group>
+                  <Form.Group className="form-group mt-2">
+                    <Form.Label>Profile Image</Form.Label>
+                    <div className="d-flex align-items-center gap-3">
+                      <Image
+                        src={imagePreview}
+                        alt="Profile preview"
+                        width={80}
+                        height={80}
+                        roundedCircle
+                        style={{ objectFit: 'cover' }}
+                      />
+                      <input
+                        type="file"
+                        accept="image/*"
+                        {...register('profileImage')}
+                        className="form-control"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onloadend = () => {
+                              setImagePreview(reader.result as string);
+                            };
+                            reader.readAsDataURL(file);
+                          } else {
+                            setImagePreview('/default-profile.png');
+                          }
+                        }}
+                      />
+                    </div>
+                    <Form.Text className="text-muted">
+                      Leave empty to use default profile image
+                    </Form.Text>
                   </Form.Group>
                   <Form.Group className="form-group mt-2">
                     <Form.Label>Courses</Form.Label>

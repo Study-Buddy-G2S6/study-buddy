@@ -27,7 +27,7 @@ export default async function UserHome() {
       <Container className="my-5">
         <div className="row g-4 justify-content-center">
           <div className="col-md-6 col-lg-5">
-            <Link href="/session/all-sessions" className="text-decoration-none">
+            <Link href="/session" className="text-decoration-none">
               <Button variant="primary" size="lg" className="w-100 py-5 shadow">
                 <strong className="fs-4">Find Study Sessions</strong>
               </Button>

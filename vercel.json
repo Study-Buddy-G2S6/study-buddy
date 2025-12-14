@@ -1,8 +1,4 @@
 {
   "buildCommand": "prisma generate && prisma migrate deploy && next build",
-  "installCommand": "npm install",
-  "env": {
-    "NEXTAUTH_URL": "@nextauth_url",
-    "NEXTAUTH_SECRET": "@nextauth_secret"
-  }
+  "installCommand": "npm install"
 }
