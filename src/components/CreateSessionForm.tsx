@@ -27,7 +27,7 @@ const onSubmit = async (data: {
   // Combine date and times into full Date objects
   const startDate = new Date(`${data.sessionDate}T${data.startTime}`);
   const endDate = new Date(`${data.sessionDate}T${data.endTime}`);
-
+  
   const sessionData = {
     name: data.name,
     courseId: data.courseId,
@@ -40,7 +40,7 @@ const onSubmit = async (data: {
     createdAt: data.createdAt,
     updatedAt: data.updatedAt,
   };
-
+  
   // console.log(`onSubmit data: ${JSON.stringify(sessionData, null, 2)}`);
   await createSession(sessionData);
   swal('Success', 'Your session has been created', 'success', {
