@@ -1,12 +1,21 @@
 import { getServerSession } from 'next-auth';
-import { Col, Container, Row, Table } from 'react-bootstrap';
+import { Col, Container, Row, Table, Button } from 'react-bootstrap';
 import StuffItemAdmin from '@/components/StuffItemAdmin';
 import { prisma } from '@/lib/prisma';
 import { adminProtectedPage } from '@/lib/page-protection';
 import authOptions from '@/lib/authOptions';
+import { revalidatePath } from 'next/cache';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+async function deleteUser(formData: FormData) {
+  'use server';
+  const userId = Number(formData.get('userId'));
+  await prisma.user.delete({ where: { id: userId } });
+  revalidatePath('/admin');
+}
+
 const AdminPage = async () => {
   const session = await getServerSession(authOptions);
   adminProtectedPage(
@@ -49,6 +58,7 @@ const AdminPage = async () => {
                 <tr>
                   <th>Email</th>
                   <th>Role</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -56,6 +66,27 @@ const AdminPage = async () => {
                   <tr key={user.id}>
                     <td>{user.email}</td>
                     <td>{user.role}</td>
+                    <td>
+                      <form action={deleteUser} style={{ display: 'inline' }}>
+                        <input type="hidden" name="userId" value={user.id} />
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          type="submit"
+                          onClick={(e) => {
+                            if (
+                              !confirm(
+                                'Are you sure you want to delete this user? This will permanently remove them and all their data.',
+                              )
+                            ) {
+                              e.preventDefault();
+                            }
+                          }}
+                        >
+                          Delete
+                        </Button>
+                      </form>
+                    </td>
                   </tr>
                 ))}
               </tbody>
