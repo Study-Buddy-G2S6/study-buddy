@@ -6,6 +6,7 @@ import { prisma } from '@/lib/prisma';
 
 // Force dynamic to ensure this route runs on the server in Vercel
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 declare module 'next-auth' {
   interface Session {

@@ -6,6 +6,7 @@ import { prisma } from '@/lib/prisma';
 // Ensure this page always renders on the server (no ISR/SSG) so Prisma works on Vercel
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
+export const runtime = 'nodejs';
 
 export default async function LeaderboardPage() {
   const session = await getServerSession(authOptions);

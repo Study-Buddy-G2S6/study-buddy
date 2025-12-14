@@ -5,6 +5,8 @@ import { loggedInProtectedPage } from '@/lib/page-protection';
 import authOptions from '@/lib/authOptions';
 import MySessionsListClient from '@/components/MySessionsListClient';
 
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 /** Render a list of items for the logged in user. */
 const ListPage = async () => {
   // Protect the page, only logged in users can access it.

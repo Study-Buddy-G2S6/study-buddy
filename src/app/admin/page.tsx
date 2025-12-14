@@ -5,6 +5,8 @@ import { prisma } from '@/lib/prisma';
 import { adminProtectedPage } from '@/lib/page-protection';
 import authOptions from '@/lib/authOptions';
 
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 const AdminPage = async () => {
   const session = await getServerSession(authOptions);
   adminProtectedPage(
