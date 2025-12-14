@@ -60,7 +60,7 @@ export default async function LeaderboardPage() {
 
   return (
     <div className="container py-5">
-      <h1 className="display-5 fw-bold text-dark mb-3">Session Leaderboard</h1>
+      <h1 className="display-5 fw-bold text-dark mb-3">Leaderboard</h1>
       <p className="text-muted mb-4">Top 50 users by sessions created (tracked via points).</p>
 
       {currentUser && (
