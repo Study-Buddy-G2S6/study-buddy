@@ -24,7 +24,7 @@ export const CreateSessionSchema = Yup.object({
   startTime: Yup.string().required('Start time is required'),
   endTime: Yup.string()
     .required('End time is required')
-    .test('is-after-start', 'End time must be after start time', function(value) {
+    .test('is-after-start', 'End time must be after start time', function (value) {
       const { startTime } = this.parent;
       if (!value || !startTime) return true;
       return value > startTime;
@@ -45,7 +45,7 @@ export const EditSessionSchema = Yup.object({
   startTime: Yup.string().required('Start time is required'),
   endTime: Yup.string()
     .required('End time is required')
-    .test('is-after-start', 'End time must be after start time', function(value) {
+    .test('is-after-start', 'End time must be after start time', function (value) {
       const { startTime } = this.parent;
       if (!value || !startTime) return true;
       return value > startTime;
