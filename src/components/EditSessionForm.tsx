@@ -12,7 +12,7 @@ import LoadingSpinner from '@/components/LoadingSpinner';
 import { EditSessionSchema } from '@/lib/validationSchemas';
 import { Session } from '@prisma/client';
 
-const onSubmit = async (data: Omit<Session, 'description' | 'startDate' | 'endDate'> & { 
+const onSubmit = async (data: Omit<Session, 'description' | 'startDate' | 'endDate'> & {
   description?: string;
   sessionDate: string;
   startTime: string;
@@ -21,7 +21,7 @@ const onSubmit = async (data: Omit<Session, 'description' | 'startDate' | 'endDa
   // Combine date and times into full Date objects
   const startDate = new Date(`${data.sessionDate}T${data.startTime}`);
   const endDate = new Date(`${data.sessionDate}T${data.endTime}`);
-  
+
   const sessionData = {
     id: data.id,
     name: data.name,
@@ -35,7 +35,7 @@ const onSubmit = async (data: Omit<Session, 'description' | 'startDate' | 'endDa
     createdAt: data.createdAt,
     updatedAt: data.updatedAt,
   };
-  
+
   // console.log(`onSubmit data: ${JSON.stringify(sessionData, null, 2)}`);
   await editSession(sessionData as Session);
   swal('Success', 'Your session has been updated', 'success', {
