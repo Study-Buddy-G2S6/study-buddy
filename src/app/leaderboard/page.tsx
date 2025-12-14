@@ -1,5 +1,6 @@
 import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
+import { Image } from 'react-bootstrap';
 import authOptions from '@/lib/authOptions';
 import { prisma } from '@/lib/prisma';
 
@@ -27,6 +28,7 @@ export default async function LeaderboardPage() {
         email: true,
         userName: true,
         points: true,
+        profileImage: true,
       },
       orderBy: [
         { points: 'desc' },
@@ -41,19 +43,20 @@ export default async function LeaderboardPage() {
         email: true,
         userName: true,
         points: true,
+        profileImage: true,
       },
     }),
   ]);
 
   const currentRank = currentUser
     ? (await prisma.user.count({
-        where: {
-          OR: [
-            { points: { gt: currentUser.points } },
-            { points: currentUser.points, email: { lt: currentUser.email } },
-          ],
-        },
-      })) + 1
+      where: {
+        OR: [
+          { points: { gt: currentUser.points } },
+          { points: currentUser.points, email: { lt: currentUser.email } },
+        ],
+      },
+    })) + 1
     : null;
 
   const isOutsideTop = currentRank ? currentRank > leaders.length : false;
@@ -66,15 +69,28 @@ export default async function LeaderboardPage() {
       {currentUser && (
         <div className="card shadow-sm border-0 mb-4">
           <div className="card-body d-flex flex-wrap align-items-center justify-content-between gap-3">
-            <div>
-              <div className="text-uppercase text-muted fw-semibold small mb-1">Your standing</div>
-              <div className="h4 mb-1">{currentUser.userName || currentUser.email}</div>
-              <div className="text-muted" style={{ fontSize: '0.95rem' }}>{currentUser.email}</div>
+            <div className="d-flex align-items-center gap-3">
+              <Image
+                src={currentUser.profileImage ?? '/default-profile.png'}
+                alt="Profile"
+                width={60}
+                height={60}
+                roundedCircle
+                style={{ objectFit: 'cover' }}
+              />
+              <div>
+                <div className="text-uppercase text-muted fw-semibold small mb-1">Your standing</div>
+                <div className="h4 mb-1">{currentUser.userName || currentUser.email}</div>
+                <div className="text-muted" style={{ fontSize: '0.95rem' }}>{currentUser.email}</div>
+              </div>
             </div>
             <div className="d-flex align-items-center gap-4">
               <div className="text-center">
                 <div className="text-muted small">Rank</div>
-                <div className="display-6 mb-0">#{currentRank ?? '-'}</div>
+                <div className="display-6 mb-0">
+                  #
+                  {currentRank ?? '-'}
+                </div>
               </div>
               <div className="text-center">
                 <div className="text-muted small">Sessions</div>
@@ -105,10 +121,25 @@ export default async function LeaderboardPage() {
             <tbody>
               {leaders.map((leader, index) => (
                 <tr key={leader.id}>
-                  <td className="fw-semibold">#{index + 1}</td>
+                  <td className="fw-semibold">
+                    #
+                    {index + 1}
+                  </td>
                   <td>
-                    <div className="fw-semibold text-dark">{leader.userName || leader.email}</div>
-                    <div className="text-muted" style={{ fontSize: '0.9rem' }}>{leader.email}</div>
+                    <div className="d-flex align-items-center gap-3">
+                      <Image
+                        src={leader.profileImage ?? '/default-profile.png'}
+                        alt="Profile"
+                        width={40}
+                        height={40}
+                        roundedCircle
+                        style={{ objectFit: 'cover' }}
+                      />
+                      <div>
+                        <div className="fw-semibold text-dark">{leader.userName || leader.email}</div>
+                        <div className="text-muted" style={{ fontSize: '0.9rem' }}>{leader.email}</div>
+                      </div>
+                    </div>
                   </td>
                   <td className="fw-bold text-primary">{leader.points ?? 0}</td>
                 </tr>

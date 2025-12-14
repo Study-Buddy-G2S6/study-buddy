@@ -20,6 +20,7 @@ const Profile = ({ user }: { user: User & { courses?: Course[] } }) => {
                   width={140}
                   height={140}
                   roundedCircle
+                  style={{ objectFit: 'cover' }}
                 />
               </Col>
               <Col>

@@ -6,7 +6,7 @@ import { redirect, useRouter } from 'next/navigation';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
-import { Card, Col, Container, Button, Form, Row } from 'react-bootstrap';
+import { Card, Col, Container, Button, Form, Row, Image } from 'react-bootstrap';
 import { getUserWithEnrolledCourses } from '@/lib/dbActions';
 import LoadingSpinner from './LoadingSpinner';
 
@@ -16,7 +16,7 @@ type SignUpForm = {
   password?: string;
   userName: string;
   description?: string;
-  profileImage?: string;
+  profileImage?: FileList;
   // We'll read course selections as an array of courseName strings
   // allow undefined entries because yupResolver may infer (string | undefined)[]
   courses?: (string | undefined)[];
@@ -35,7 +35,6 @@ const EditProfileForm = ({ userId }: { userId: number }) => {
     password: Yup.string(),
     userName: Yup.string().required(),
     description: Yup.string(),
-    profileImage: Yup.string(),
     courses: Yup.array().of(Yup.string()),
   });
 
@@ -52,7 +51,6 @@ const EditProfileForm = ({ userId }: { userId: number }) => {
       password: '',
       userName: '',
       description: '',
-      profileImage: '/default-profile.png',
       courses: [],
     },
   });
@@ -61,6 +59,8 @@ const EditProfileForm = ({ userId }: { userId: number }) => {
   const [coursesDb, setCoursesDb] = useState<{ id: number; courseName: string; courseTitle: string }[]>([]);
   const [enrolledCourseNames, setEnrolledCourseNames] = useState<string[]>([]);
   const [showCourses, setShowCourses] = useState(false);
+  const [currentProfileImage, setCurrentProfileImage] = useState<string>('/default-profile.png');
+  const [imagePreview, setImagePreview] = useState<string>('/default-profile.png');
 
   useEffect(() => {
     // fetch the default courses from the new api route
@@ -81,6 +81,10 @@ const EditProfileForm = ({ userId }: { userId: number }) => {
         if (userWithCourses?.courses) {
           const enrolled = userWithCourses.courses.map((c) => c.course.courseName);
           setEnrolledCourseNames(enrolled);
+          // Set current profile image
+          const profileImg = userWithCourses.profileImage ?? '/default-profile.png';
+          setCurrentProfileImage(profileImg);
+          setImagePreview(profileImg);
           // Update form default values with enrolled courses
           reset((formValues) => ({
             ...formValues,
@@ -117,6 +121,17 @@ const EditProfileForm = ({ userId }: { userId: number }) => {
         return { courseName: name, courseTitle: found?.courseTitle ?? name };
       });
 
+    // Convert image to base64 if a new image was provided, otherwise keep current
+    let profileImageBase64 = currentProfileImage;
+    if (data.profileImage && data.profileImage.length > 0) {
+      const file = data.profileImage[0];
+      profileImageBase64 = await new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.readAsDataURL(file);
+      });
+    }
+
     const res = await fetch('/api/user/update', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -127,7 +142,7 @@ const EditProfileForm = ({ userId }: { userId: number }) => {
         userName: data.userName ?? data.email,
         description: data.description ?? '',
         courses: courseObjects,
-        profileImage: '/default-profile.png',
+        profileImage: profileImageBase64,
       }),
     });
 
@@ -164,6 +179,40 @@ const EditProfileForm = ({ userId }: { userId: number }) => {
                       className={`form-control ${errors.description ? 'is-invalid' : ''}`}
                     />
                     <div className="invalid-feedback">{errors.description?.message}</div>
+                  </Form.Group>
+                  <Form.Group className="form-group mt-2">
+                    <Form.Label>Profile Image</Form.Label>
+                    <div className="d-flex align-items-center gap-3">
+                      <Image
+                        src={imagePreview}
+                        alt="Profile preview"
+                        width={80}
+                        height={80}
+                        roundedCircle
+                        style={{ objectFit: 'cover' }}
+                      />
+                      <input
+                        type="file"
+                        accept="image/*"
+                        {...register('profileImage')}
+                        className="form-control"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onloadend = () => {
+                              setImagePreview(reader.result as string);
+                            };
+                            reader.readAsDataURL(file);
+                          } else {
+                            setImagePreview(currentProfileImage);
+                          }
+                        }}
+                      />
+                    </div>
+                    <Form.Text className="text-muted">
+                      Leave empty to keep current image
+                    </Form.Text>
                   </Form.Group>
                   <Form.Group className="form-group mt-2">
                     <Form.Label>Courses</Form.Label>

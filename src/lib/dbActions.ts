@@ -241,6 +241,7 @@ export async function editUser(credentials: {
       email: credentials.email,
       userName: credentials.userName,
       description: credentials.description,
+      profileImage: credentials.profileImage,
       ...(courses.length > 0 && {
         courses: {
           deleteMany: {},
