@@ -5,13 +5,12 @@ import AllUsersSessionCard from '@/components/AllUsersSessionCard';
 import Link from 'next/link';
 import { Button, Container } from 'react-bootstrap';
 import { revalidatePath } from 'next/cache';
-import DeleteForm from './DeleteForm'; // We'll create this tiny client component below
+import DeleteForm from './DeleteForm'; // Assuming you have this client component for delete confirm
 
 export const dynamic = 'force-dynamic';
 
 async function deleteSession(formData: FormData) {
   'use server';
-
   const sessionId = Number(formData.get('sessionId'));
 
   const existing = await prisma.session.findUnique({
@@ -42,9 +41,9 @@ async function deleteSession(formData: FormData) {
 }
 
 export default async function AdminSessionsPage() {
-  const serverSession = await getServerSession(authOptions);
+  const session = await getServerSession(authOptions);
 
-  if (!serverSession?.user || (serverSession.user as any).role !== 'ADMIN') {
+  if (!session?.user || (session.user as any).role !== 'ADMIN') {
     return (
       <Container className="py-5 text-center">
         <h1>Access Denied</h1>
@@ -79,7 +78,8 @@ export default async function AdminSessionsPage() {
           {allSessions.map((session) => (
             <div key={session.id} className="col-md-6 col-lg-4">
               <div className="border rounded p-3 shadow-sm bg-white">
-                <AllUsersSessionCard session={session} />
+                {/* FIXED: Pass flat props to match AllUsersSessionCard expectations */}
+                <AllUsersSessionCard session={session} course={session.course} user={session.user} />
 
                 <div className="mt-3 d-flex gap-2">
                   <Link href={`/session/edit/${session.id}`}>
@@ -88,8 +88,7 @@ export default async function AdminSessionsPage() {
                     </Button>
                   </Link>
 
-                  {/* Client component for delete with confirm */}
-                  <DeleteForm sessionId={session.id} action={deleteSession} />
+                  <DeleteForm sessionId={session.id} />
                 </div>
               </div>
             </div>
