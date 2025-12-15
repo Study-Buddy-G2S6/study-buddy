@@ -5,12 +5,13 @@ import AllUsersSessionCard from '@/components/AllUsersSessionCard';
 import Link from 'next/link';
 import { Button, Container } from 'react-bootstrap';
 import { revalidatePath } from 'next/cache';
-import DeleteForm from './DeleteForm'; // Assuming you have this client component for delete confirm
+import DeleteForm from './DeleteForm';
 
 export const dynamic = 'force-dynamic';
 
 async function deleteSession(formData: FormData) {
   'use server';
+
   const sessionId = Number(formData.get('sessionId'));
 
   const existing = await prisma.session.findUnique({
@@ -75,20 +76,20 @@ export default async function AdminSessionsPage() {
         <p>No sessions found.</p>
       ) : (
         <div className="row g-4">
-          {allSessions.map((session) => (
-            <div key={session.id} className="col-md-6 col-lg-4">
+          {allSessions.map((s) => (
+            <div key={s.id} className="col-md-6 col-lg-4">
               <div className="border rounded p-3 shadow-sm bg-white">
-                {/* FIXED: Pass flat props to match AllUsersSessionCard expectations */}
-                <AllUsersSessionCard session={session} course={session.course} user={session.user} />
+                <AllUsersSessionCard session={s} course={s.course} user={s.user} />
 
                 <div className="mt-3 d-flex gap-2">
-                  <Link href={`/session/edit/${session.id}`}>
+                  <Link href={`/session/edit/${s.id}`}>
                     <Button variant="primary" size="sm">
                       Edit
                     </Button>
                   </Link>
 
-                  <DeleteForm sessionId={session.id} />
+                  {/* Fixed: Pass both sessionId and the server action */}
+                  <DeleteForm sessionId={s.id} action={deleteSession} />
                 </div>
               </div>
             </div>
